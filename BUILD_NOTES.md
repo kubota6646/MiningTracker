@@ -43,7 +43,7 @@
 ```gradle
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT'
-    implementation 'com.mysql:mysql-connector-j:8.0.33'
+    implementation 'com.mysql:mysql-connector-j:8.3.0'
 }
 ```
 
@@ -51,6 +51,8 @@ dependencies {
 - Maven Central（MySQL JDBC Driver）
 - Sonatype OSS Snapshots
 - Spigot Nexus Repository
+
+**セキュリティ注意**: MySQL Connector/J 8.3.0を使用しています。これは既知の脆弱性が修正された安全なバージョンです。
 
 ## 動作確認が必要な機能
 
