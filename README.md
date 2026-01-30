@@ -163,6 +163,9 @@ messages:
 - 大規模サーバーや複数サーバーでのデータ共有に最適
 - config.ymlで接続情報を設定
 - パフォーマンスと拡張性に優れる
+- **HikariCP接続プール**を使用した高速データベースアクセス
+- 自動接続管理と最適化されたクエリ実行
+- 複数の同時接続を効率的に処理
 
 ### MySQL使用例
 
@@ -176,12 +179,31 @@ database:
     database: minecraft
     username: your_username
     password: your_password
+    pool:
+      maximum-pool-size: 10      # 最大接続数（デフォルト: 10）
+      minimum-idle: 2            # 最小アイドル接続数（デフォルト: 2）
+      connection-timeout: 30000  # 接続タイムアウト（ミリ秒、デフォルト: 30000）
 ```
 
 事前にMySQLサーバー上でデータベースを作成：
 ```sql
 CREATE DATABASE minecraft CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
+
+#### 接続プール設定について
+- **maximum-pool-size**: 同時に維持する最大接続数。プレイヤー数やサーバー負荷に応じて調整してください
+  - 小規模サーバー（〜50人）: 5-10
+  - 中規模サーバー（50-200人）: 10-20
+  - 大規模サーバー（200人以上）: 20-30
+- **minimum-idle**: アイドル状態で維持する最小接続数。レスポンス時間を改善します
+- **connection-timeout**: 接続取得のタイムアウト時間（ミリ秒）
+
+#### MySQL性能最適化
+HikariCPは以下の最適化を自動的に適用します：
+- PreparedStatementのキャッシュ
+- バッチ書き込みの最適化
+- サーバー設定のキャッシュ
+- 接続の自動再利用とプール管理
 
 ### テーブル構造
 
@@ -202,6 +224,18 @@ CREATE DATABASE minecraft CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ### データが保存されない
 - `plugins/MiningTracker`フォルダの書き込み権限を確認
 - サーバーログでデータベースエラーを確認
+- MySQL使用時はMySQLサーバーが稼働していることを確認
+- MySQL接続情報（ホスト、ポート、ユーザー名、パスワード）が正しいか確認
+
+### MySQL接続エラー
+- MySQLサーバーが起動しているか確認
+- ファイアウォールでポート3306が開いているか確認
+- MySQLユーザーに適切な権限があるか確認：
+  ```sql
+  GRANT ALL PRIVILEGES ON minecraft.* TO 'your_username'@'localhost';
+  FLUSH PRIVILEGES;
+  ```
+- 接続プール設定が適切か確認（maximum-pool-sizeが大きすぎないか等）
 
 ### コマンドが動作しない
 - 権限が正しく設定されているか確認
@@ -239,6 +273,32 @@ git clone https://github.com/kubota6646/MiningTracker.git
 cd MiningTracker
 
 # ビルド
+./gradlew build
+
+# クリーンビルド
+./gradlew clean build
+```
+
+### 使用している主要なライブラリ
+
+- **Spigot API 1.19.4**: Minecraftプラグイン開発API
+- **MySQL Connector/J 8.3.0**: MySQL JDBC ドライバー（脆弱性対策済み）
+- **HikariCP 5.1.0**: 高性能JDBC接続プール
+- **SLF4J 2.0.9**: ログフレームワーク
+
+### データベース実装の詳細
+
+#### SQLiteモード
+- 直接JDBC接続を使用
+- プラグインフォルダ内にデータベースファイルを作成
+- シングルサーバー環境に最適
+
+#### MySQLモード
+- HikariCP接続プールを使用
+- 設定可能な接続プール設定
+- 自動再接続とコネクション管理
+- PreparedStatementキャッシュによる性能向上
+- マルチサーバー環境でのデータ共有に対応
 ./gradlew build
 
 # クリーンビルド
