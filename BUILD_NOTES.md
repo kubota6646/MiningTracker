@@ -43,11 +43,12 @@
 ```gradle
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT'
+    implementation 'com.mysql:mysql-connector-j:8.0.33'
 }
 ```
 
 このプラグインは以下のリポジトリから依存関係を取得します：
-- Maven Central
+- Maven Central（MySQL JDBC Driver）
 - Sonatype OSS Snapshots
 - Spigot Nexus Repository
 
@@ -70,16 +71,22 @@ dependencies {
 
 4. **データの永続化**
    - サーバー再起動後もデータが保持されること
+   - SQLiteとMySQLの両方が正しく動作すること
 
 5. **日本語表示**
    - すべてのメッセージが正しく日本語で表示されること
    - カラーコードが正しく機能すること
 
+6. **データベース接続**
+   - SQLiteモードが正常に動作すること
+   - MySQLモードが正常に動作すること
+   - データベース設定の切り替えが機能すること
+
 ## コード品質
 
 - すべてのJavaクラスは適切なパッケージ構造に配置
 - 非同期処理を使用してデータベース操作を実行
-- SQLiteを使用した永続的なデータストレージ
+- SQLiteとMySQLの両方をサポートした永続的なデータストレージ
 - 設定可能なメッセージシステム
 - 権限システムの実装
 - エラーハンドリングの実装

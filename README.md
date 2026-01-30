@@ -83,8 +83,23 @@ gradle build
 ```yaml
 # データベース設定
 database:
-  type: sqlite              # データベースタイプ
-  file: mining_data.db      # SQLiteファイル名
+  type: sqlite              # データベースタイプ (sqlite または mysql)
+  
+  # SQLite設定
+  sqlite:
+    file: mining_data.db    # SQLiteファイル名
+  
+  # MySQL設定
+  mysql:
+    host: localhost         # MySQLサーバーのホスト
+    port: 3306             # MySQLサーバーのポート
+    database: minecraft    # データベース名
+    username: root         # ユーザー名
+    password: password     # パスワード
+    pool:
+      maximum-pool-size: 10      # 最大接続数
+      minimum-idle: 2            # 最小アイドル接続数
+      connection-timeout: 30000  # 接続タイムアウト（ミリ秒）
 
 # 採掘カウント設定
 tracking:
@@ -134,8 +149,36 @@ messages:
 
 ## データベース
 
-プラグインはSQLiteを使用してデータを保存します。
-データベースファイルは`plugins/MiningTracker/mining_data.db`に保存されます。
+プラグインはSQLiteまたはMySQLを使用してデータを保存します。
+
+### SQLite（デフォルト）
+- 設定不要で簡単に使用可能
+- データベースファイルは`plugins/MiningTracker/mining_data.db`に保存されます
+- 小規模サーバーに最適
+
+### MySQL
+- 大規模サーバーや複数サーバーでのデータ共有に最適
+- config.ymlで接続情報を設定
+- パフォーマンスと拡張性に優れる
+
+### MySQL使用例
+
+config.ymlを以下のように設定：
+```yaml
+database:
+  type: mysql
+  mysql:
+    host: localhost
+    port: 3306
+    database: minecraft
+    username: your_username
+    password: your_password
+```
+
+事前にMySQLサーバー上でデータベースを作成：
+```sql
+CREATE DATABASE minecraft CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
 ### テーブル構造
 

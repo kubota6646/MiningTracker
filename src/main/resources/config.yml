@@ -2,10 +2,34 @@
 
 # データベース設定
 database:
-  # データベースタイプ (sqlite または yaml)
+  # データベースタイプ (sqlite または mysql)
   type: sqlite
-  # SQLiteのファイル名
-  file: mining_data.db
+  
+  # SQLiteの設定
+  sqlite:
+    # SQLiteのファイル名
+    file: mining_data.db
+  
+  # MySQLの設定
+  mysql:
+    # MySQLサーバーのホスト
+    host: localhost
+    # MySQLサーバーのポート
+    port: 3306
+    # データベース名
+    database: minecraft
+    # ユーザー名
+    username: root
+    # パスワード
+    password: password
+    # 接続プール設定
+    pool:
+      # 最大接続数
+      maximum-pool-size: 10
+      # 最小アイドル接続数
+      minimum-idle: 2
+      # 接続タイムアウト（ミリ秒）
+      connection-timeout: 30000
 
 # 採掘カウント設定
 tracking:

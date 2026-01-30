@@ -21,20 +21,12 @@ public class DatabaseManager {
             String dbType = plugin.getConfig().getString("database.type", "sqlite");
             
             if (dbType.equalsIgnoreCase("sqlite")) {
-                String fileName = plugin.getConfig().getString("database.file", "mining_data.db");
-                File dataFolder = plugin.getDataFolder();
-                if (!dataFolder.exists()) {
-                    dataFolder.mkdirs();
-                }
-                
-                File dbFile = new File(dataFolder, fileName);
-                String url = "jdbc:sqlite:" + dbFile.getAbsolutePath();
-                
-                connection = DriverManager.getConnection(url);
-                createTables();
-                
-                plugin.getLogger().info("SQLiteデータベースに接続しました。");
-                return true;
+                return connectSQLite();
+            } else if (dbType.equalsIgnoreCase("mysql")) {
+                return connectMySQL();
+            } else {
+                plugin.getLogger().severe("サポートされていないデータベースタイプ: " + dbType);
+                return false;
             }
         } catch (SQLException e) {
             plugin.getLogger().severe("データベース接続エラー: " + e.getMessage());
@@ -42,6 +34,40 @@ public class DatabaseManager {
         }
         
         return false;
+    }
+    
+    private boolean connectSQLite() throws SQLException {
+        String fileName = plugin.getConfig().getString("database.sqlite.file", "mining_data.db");
+        File dataFolder = plugin.getDataFolder();
+        if (!dataFolder.exists()) {
+            dataFolder.mkdirs();
+        }
+        
+        File dbFile = new File(dataFolder, fileName);
+        String url = "jdbc:sqlite:" + dbFile.getAbsolutePath();
+        
+        connection = DriverManager.getConnection(url);
+        createTables();
+        
+        plugin.getLogger().info("SQLiteデータベースに接続しました。");
+        return true;
+    }
+    
+    private boolean connectMySQL() throws SQLException {
+        String host = plugin.getConfig().getString("database.mysql.host", "localhost");
+        int port = plugin.getConfig().getInt("database.mysql.port", 3306);
+        String database = plugin.getConfig().getString("database.mysql.database", "minecraft");
+        String username = plugin.getConfig().getString("database.mysql.username", "root");
+        String password = plugin.getConfig().getString("database.mysql.password", "password");
+        
+        String url = String.format("jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+                host, port, database);
+        
+        connection = DriverManager.getConnection(url, username, password);
+        createTables();
+        
+        plugin.getLogger().info("MySQLデータベースに接続しました。");
+        return true;
     }
     
     public void disconnect() {
@@ -56,29 +82,60 @@ public class DatabaseManager {
     }
     
     private void createTables() throws SQLException {
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS mining_data (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "player_uuid TEXT NOT NULL," +
-                "player_name TEXT NOT NULL," +
-                "block_type TEXT NOT NULL," +
-                "count INTEGER NOT NULL DEFAULT 0," +
-                "UNIQUE(player_uuid, block_type)" +
-                ")";
+        String dbType = plugin.getConfig().getString("database.type", "sqlite");
+        String createTableSQL;
+        
+        if (dbType.equalsIgnoreCase("mysql")) {
+            // MySQL用のテーブル作成SQL
+            createTableSQL = "CREATE TABLE IF NOT EXISTS mining_data (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "player_uuid VARCHAR(36) NOT NULL," +
+                    "player_name VARCHAR(16) NOT NULL," +
+                    "block_type VARCHAR(64) NOT NULL," +
+                    "count INT NOT NULL DEFAULT 0," +
+                    "UNIQUE KEY unique_player_block (player_uuid, block_type)," +
+                    "INDEX idx_player_uuid (player_uuid)," +
+                    "INDEX idx_block_type (block_type)" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+        } else {
+            // SQLite用のテーブル作成SQL
+            createTableSQL = "CREATE TABLE IF NOT EXISTS mining_data (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "player_uuid TEXT NOT NULL," +
+                    "player_name TEXT NOT NULL," +
+                    "block_type TEXT NOT NULL," +
+                    "count INTEGER NOT NULL DEFAULT 0," +
+                    "UNIQUE(player_uuid, block_type)" +
+                    ")";
+        }
         
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(createTableSQL);
             
-            // インデックスを作成
-            stmt.execute("CREATE INDEX IF NOT EXISTS idx_player_uuid ON mining_data(player_uuid)");
-            stmt.execute("CREATE INDEX IF NOT EXISTS idx_block_type ON mining_data(block_type)");
+            // SQLiteの場合のみ個別のインデックス作成（MySQLはCREATE TABLEで作成済み）
+            if (dbType.equalsIgnoreCase("sqlite")) {
+                stmt.execute("CREATE INDEX IF NOT EXISTS idx_player_uuid ON mining_data(player_uuid)");
+                stmt.execute("CREATE INDEX IF NOT EXISTS idx_block_type ON mining_data(block_type)");
+            }
         }
     }
     
     public void addMiningCount(UUID playerUUID, String playerName, Material material) {
-        String sql = "INSERT INTO mining_data (player_uuid, player_name, block_type, count) " +
-                     "VALUES (?, ?, ?, 1) " +
-                     "ON CONFLICT(player_uuid, block_type) " +
-                     "DO UPDATE SET count = count + 1, player_name = ?";
+        String dbType = plugin.getConfig().getString("database.type", "sqlite");
+        String sql;
+        
+        if (dbType.equalsIgnoreCase("mysql")) {
+            // MySQL用のUPSERT構文
+            sql = "INSERT INTO mining_data (player_uuid, player_name, block_type, count) " +
+                  "VALUES (?, ?, ?, 1) " +
+                  "ON DUPLICATE KEY UPDATE count = count + 1, player_name = ?";
+        } else {
+            // SQLite用のUPSERT構文
+            sql = "INSERT INTO mining_data (player_uuid, player_name, block_type, count) " +
+                  "VALUES (?, ?, ?, 1) " +
+                  "ON CONFLICT(player_uuid, block_type) " +
+                  "DO UPDATE SET count = count + 1, player_name = ?";
+        }
         
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, playerUUID.toString());
