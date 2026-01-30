@@ -14,21 +14,16 @@ java {
 repositories {
     mavenCentral()
     maven {
-        name = 'sonatype-oss'
-        url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-    }
-    maven {
-        name = 'spigot-repo'
-        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-        content {
-            includeGroup 'org.spigotmc'
-        }
+        name = 'papermc'
+        url = 'https://repo.papermc.io/repository/maven-public/'
     }
 }
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT'
     implementation 'com.mysql:mysql-connector-j:8.3.0'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+    implementation 'org.slf4j:slf4j-simple:2.0.9'
 }
 
 tasks.withType(JavaCompile) {

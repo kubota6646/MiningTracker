@@ -1,6 +1,8 @@
 package com.kubota6646.miningtracker.database;
 
 import com.kubota6646.miningtracker.MiningTracker;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.Material;
 
 import java.io.File;
@@ -11,6 +13,7 @@ public class DatabaseManager {
     
     private final MiningTracker plugin;
     private Connection connection;
+    private HikariDataSource hikariDataSource;
     
     public DatabaseManager(MiningTracker plugin) {
         this.plugin = plugin;
@@ -60,25 +63,82 @@ public class DatabaseManager {
         String username = plugin.getConfig().getString("database.mysql.username", "root");
         String password = plugin.getConfig().getString("database.mysql.password", "password");
         
-        String url = String.format("jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
-                host, port, database);
+        // HikariCP接続プール設定
+        int maxPoolSize = plugin.getConfig().getInt("database.mysql.pool.maximum-pool-size", 10);
+        int minIdle = plugin.getConfig().getInt("database.mysql.pool.minimum-idle", 2);
+        long connectionTimeout = plugin.getConfig().getLong("database.mysql.pool.connection-timeout", 30000);
         
-        connection = DriverManager.getConnection(url, username, password);
-        createTables();
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s", host, port, database));
+        hikariConfig.setUsername(username);
+        hikariConfig.setPassword(password);
+        hikariConfig.setMaximumPoolSize(maxPoolSize);
+        hikariConfig.setMinimumIdle(minIdle);
+        hikariConfig.setConnectionTimeout(connectionTimeout);
+        hikariConfig.setLeakDetectionThreshold(60000);
         
-        plugin.getLogger().info("MySQLデータベースに接続しました。");
-        return true;
+        // MySQL最適化設定
+        hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
+        hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
+        hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        hikariConfig.addDataSourceProperty("useServerPrepStmts", "true");
+        hikariConfig.addDataSourceProperty("useLocalSessionState", "true");
+        hikariConfig.addDataSourceProperty("rewriteBatchedStatements", "true");
+        hikariConfig.addDataSourceProperty("cacheResultSetMetadata", "true");
+        hikariConfig.addDataSourceProperty("cacheServerConfiguration", "true");
+        hikariConfig.addDataSourceProperty("elideSetAutoCommits", "true");
+        hikariConfig.addDataSourceProperty("maintainTimeStats", "false");
+        
+        // SSL設定
+        hikariConfig.addDataSourceProperty("useSSL", "false");
+        hikariConfig.addDataSourceProperty("allowPublicKeyRetrieval", "true");
+        hikariConfig.addDataSourceProperty("serverTimezone", "UTC");
+        hikariConfig.addDataSourceProperty("characterEncoding", "utf8mb4");
+        
+        try {
+            hikariDataSource = new HikariDataSource(hikariConfig);
+            connection = hikariDataSource.getConnection();
+            createTables();
+            
+            plugin.getLogger().info("MySQLデータベースに接続しました（HikariCP使用）。");
+            plugin.getLogger().info("接続プール設定: 最大=" + maxPoolSize + ", 最小=" + minIdle);
+            return true;
+        } catch (SQLException e) {
+            if (hikariDataSource != null) {
+                hikariDataSource.close();
+            }
+            throw e;
+        }
     }
     
     public void disconnect() {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
-                plugin.getLogger().info("データベース接続を切断しました。");
             }
+            if (hikariDataSource != null && !hikariDataSource.isClosed()) {
+                hikariDataSource.close();
+                plugin.getLogger().info("データベース接続プールを閉じました。");
+            }
+            plugin.getLogger().info("データベース接続を切断しました。");
         } catch (SQLException e) {
             plugin.getLogger().severe("データベース切断エラー: " + e.getMessage());
         }
+    }
+    
+    private Connection getConnection() throws SQLException {
+        String dbType = plugin.getConfig().getString("database.type", "sqlite");
+        
+        if (dbType.equalsIgnoreCase("mysql") && hikariDataSource != null) {
+            return hikariDataSource.getConnection();
+        }
+        
+        // SQLiteの場合は既存の接続を返す
+        if (connection != null && !connection.isClosed()) {
+            return connection;
+        }
+        
+        throw new SQLException("データベース接続が利用できません");
     }
     
     private void createTables() throws SQLException {
@@ -137,7 +197,8 @@ public class DatabaseManager {
                   "DO UPDATE SET count = count + 1, player_name = ?";
         }
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, playerUUID.toString());
             pstmt.setString(2, playerName);
             pstmt.setString(3, material.name());
@@ -152,7 +213,8 @@ public class DatabaseManager {
         Map<Material, Integer> stats = new HashMap<>();
         String sql = "SELECT block_type, count FROM mining_data WHERE player_uuid = ?";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, playerUUID.toString());
             ResultSet rs = pstmt.executeQuery();
             
@@ -176,7 +238,8 @@ public class DatabaseManager {
     public int getTotalMined(UUID playerUUID) {
         String sql = "SELECT SUM(count) as total FROM mining_data WHERE player_uuid = ?";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, playerUUID.toString());
             ResultSet rs = pstmt.executeQuery();
             
@@ -198,7 +261,8 @@ public class DatabaseManager {
                      "ORDER BY total DESC " +
                      "LIMIT ? OFFSET ?";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, limit);
             pstmt.setInt(2, offset);
             ResultSet rs = pstmt.executeQuery();
@@ -218,7 +282,8 @@ public class DatabaseManager {
     public int getTotalPlayers() {
         String sql = "SELECT COUNT(DISTINCT player_uuid) as count FROM mining_data";
         
-        try (Statement stmt = connection.createStatement();
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             
             if (rs.next()) {
@@ -234,7 +299,8 @@ public class DatabaseManager {
     public void resetPlayerStats(UUID playerUUID) {
         String sql = "DELETE FROM mining_data WHERE player_uuid = ?";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, playerUUID.toString());
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -245,7 +311,8 @@ public class DatabaseManager {
     public void resetAllStats() {
         String sql = "DELETE FROM mining_data";
         
-        try (Statement stmt = connection.createStatement()) {
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
             stmt.executeUpdate(sql);
         } catch (SQLException e) {
             plugin.getLogger().warning("全統計リセットエラー: " + e.getMessage());
