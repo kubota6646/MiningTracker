@@ -1,0 +1,32 @@
+name: MiningTracker
+version: '${version}'
+main: com.kubota6646.miningtracker.MiningTracker
+api-version: 1.19
+author: kubota6646
+description: プレイヤーのブロック採掘をトラッキングするプラグイン
+
+commands:
+  mtstats:
+    description: 自分の採掘統計を表示
+    usage: /mtstats [プレイヤー名]
+    aliases: [mts, minestats]
+  mtranking:
+    description: 採掘ランキングを表示
+    usage: /mtranking [ページ番号]
+    aliases: [mtr, mineranking]
+  mtreset:
+    description: 統計をリセット（管理者専用）
+    usage: /mtreset <プレイヤー名|all>
+    permission: miningtracker.reset
+    aliases: [mtres]
+
+permissions:
+  miningtracker.use:
+    description: プラグインの基本機能を使用
+    default: true
+  miningtracker.reset:
+    description: 統計をリセットする権限
+    default: op
+  miningtracker.other:
+    description: 他のプレイヤーの統計を閲覧
+    default: true
