@@ -12,8 +12,6 @@ Minecraft 1.21.x対応のプレイヤー採掘トラッキングプラグイン
 - **対応Minecraft**: 1.21.x
 - **必須Java**: 21以降
 
-> **注意**: Minecraft 1.19.4用には [v1.0.0](https://github.com/kubota6646/MiningTracker/releases/tag/v1.0.0) を使用してください。
-
 ## 概要
 
 MiningTrackerは、各プレイヤーがどのブロックをどれだけ採掘したかを記録し、ランキング形式で表示するMinecraftプラグインです。
