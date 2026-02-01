@@ -4,11 +4,11 @@ plugins {
 }
 
 group = 'com.kubota6646'
-version = '1.0.0'
+version = '2.0.0'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 repositories {
@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
     implementation 'com.mysql:mysql-connector-j:8.3.0'
     implementation 'com.zaxxer:HikariCP:5.1.0'
     implementation 'org.slf4j:slf4j-simple:2.0.9'

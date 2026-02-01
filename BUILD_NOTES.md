@@ -6,12 +6,12 @@
 ## 必要な環境
 
 ### Java バージョン
-- Java 17以降が必要
-- Java 21まで対応（推奨）
+- Java 21以降が必須
+- Minecraft 1.21.xの要件
 
 ### Gradle バージョン
 - Gradle 8.5以降が必要
-- Java 21を使用する場合は必須（Gradle 8.0-8.4はJava 20まで対応）
+- Java 21をサポートするバージョン（必須）
 
 ### Gradle と Java の互換性
 | Gradle バージョン | 対応するJavaバージョン |
@@ -61,8 +61,10 @@
 
 ```gradle
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
     implementation 'com.mysql:mysql-connector-j:8.3.0'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+    implementation 'org.slf4j:slf4j-simple:2.0.9'
 }
 ```
 

@@ -1,7 +1,7 @@
 name: MiningTracker
 version: '${version}'
 main: com.kubota6646.miningtracker.MiningTracker
-api-version: 1.19
+api-version: '1.21'
 author: kubota6646
 description: プレイヤーのブロック採掘をトラッキングするプラグイン
 

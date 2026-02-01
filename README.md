@@ -1,6 +1,18 @@
 # MiningTracker
 
-Minecraft 1.19.4対応のプレイヤー採掘トラッキングプラグイン
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.x-green.svg)](https://www.minecraft.net/)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.java.com/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+Minecraft 1.21.x対応のプレイヤー採掘トラッキングプラグイン
+
+## バージョン情報
+
+- **最新バージョン**: 2.0.0
+- **対応Minecraft**: 1.21.x
+- **必須Java**: 21以降
+
+> **注意**: Minecraft 1.19.4用には [v1.0.0](https://github.com/kubota6646/MiningTracker/releases/tag/v1.0.0) を使用してください。
 
 ## 概要
 
@@ -16,10 +28,10 @@ MiningTrackerは、各プレイヤーがどのブロックをどれだけ採掘�
 
 ## 動作環境
 
-- Minecraft バージョン: 1.19.4
-- Java バージョン: 17以降（Java 21まで対応）
+- Minecraft バージョン: 1.21.x (1.21, 1.21.1, 1.21.3など)
+- Java バージョン: 21以降（必須）
 - Gradle バージョン: 8.5以降
-- サーバー: Spigot/Paper 1.19.4
+- サーバー: Spigot/Paper 1.21.x
 - MySQL サーバー（オプション）: 5.7以降または8.0以降
 
 **セキュリティ**: MySQL使用時はMySQL Connector/J 8.3.0を使用しています（脆弱性修正済み）。
@@ -27,8 +39,10 @@ MiningTrackerは、各プレイヤーがどのブロックをどれだけ採掘�
 ## ビルド方法
 
 ### 前提条件
-- Java 17以降がインストールされていること（Java 21まで対応）
+- Java 21以降がインストールされていること（必須）
 - Gradle 8.5以降がインストールされていること（またはGradle Wrapperを使用）
+
+**重要**: Minecraft 1.21.xではJava 21が必須要件です。Java 17では動作しません。
 
 ### ビルドコマンド
 
