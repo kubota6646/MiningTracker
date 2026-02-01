@@ -130,15 +130,42 @@ public class DatabaseManager {
         String dbType = plugin.getConfig().getString("database.type", "sqlite");
         
         if (dbType.equalsIgnoreCase("mysql") && hikariDataSource != null) {
+            // MySQLの場合は接続プールから新しい接続を取得
             return hikariDataSource.getConnection();
         }
         
-        // SQLiteの場合は既存の接続を返す
-        if (connection != null && !connection.isClosed()) {
+        // SQLiteの場合は既存の接続を確認し、閉じている場合は再接続
+        if (dbType.equalsIgnoreCase("sqlite")) {
+            if (connection == null || connection.isClosed()) {
+                // 再接続を試みる
+                plugin.getLogger().info("SQLite接続を再確立しています...");
+                connectSQLite();
+            }
             return connection;
         }
         
         throw new SQLException("データベース接続が利用できません");
+    }
+    
+    /**
+     * SQLite用の接続を取得（try-with-resourcesで閉じてはいけない）
+     */
+    private Connection getSQLiteConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            plugin.getLogger().info("SQLite接続を再確立しています...");
+            connectSQLite();
+        }
+        return connection;
+    }
+    
+    /**
+     * MySQL用の接続を取得（HikariCPプールから取得、try-with-resourcesで返却される）
+     */
+    private Connection getMySQLConnection() throws SQLException {
+        if (hikariDataSource == null) {
+            throw new SQLException("MySQL接続プールが初期化されていません");
+        }
+        return hikariDataSource.getConnection();
     }
     
     private void createTables() throws SQLException {
@@ -197,39 +224,80 @@ public class DatabaseManager {
                   "DO UPDATE SET count = count + 1, player_name = ?";
         }
         
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, playerUUID.toString());
-            pstmt.setString(2, playerName);
-            pstmt.setString(3, material.name());
-            pstmt.setString(4, playerName);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            plugin.getLogger().warning("採掘データの保存エラー: " + e.getMessage());
+        if (dbType.equalsIgnoreCase("mysql")) {
+            // MySQLの場合: 接続プールから取得、try-with-resourcesで返却
+            try (Connection conn = getMySQLConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, playerUUID.toString());
+                pstmt.setString(2, playerName);
+                pstmt.setString(3, material.name());
+                pstmt.setString(4, playerName);
+                pstmt.executeUpdate();
+            } catch (SQLException e) {
+                plugin.getLogger().warning("採掘データの保存エラー: " + e.getMessage());
+            }
+        } else {
+            // SQLiteの場合: 永続的な接続を使用、閉じない
+            try {
+                Connection conn = getSQLiteConnection();
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setString(1, playerUUID.toString());
+                    pstmt.setString(2, playerName);
+                    pstmt.setString(3, material.name());
+                    pstmt.setString(4, playerName);
+                    pstmt.executeUpdate();
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("採掘データの保存エラー: " + e.getMessage());
+            }
         }
     }
     
     public Map<Material, Integer> getPlayerStats(UUID playerUUID) {
         Map<Material, Integer> stats = new HashMap<>();
         String sql = "SELECT block_type, count FROM mining_data WHERE player_uuid = ?";
+        String dbType = plugin.getConfig().getString("database.type", "sqlite");
         
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, playerUUID.toString());
-            ResultSet rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                String blockType = rs.getString("block_type");
-                int count = rs.getInt("count");
-                try {
-                    Material material = Material.valueOf(blockType);
-                    stats.put(material, count);
-                } catch (IllegalArgumentException e) {
-                    // 無効なマテリアルは無視
+        if (dbType.equalsIgnoreCase("mysql")) {
+            try (Connection conn = getMySQLConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, playerUUID.toString());
+                ResultSet rs = pstmt.executeQuery();
+                
+                while (rs.next()) {
+                    String blockType = rs.getString("block_type");
+                    int count = rs.getInt("count");
+                    try {
+                        Material material = Material.valueOf(blockType);
+                        stats.put(material, count);
+                    } catch (IllegalArgumentException e) {
+                        // 無効なマテリアルは無視
+                    }
                 }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
             }
-        } catch (SQLException e) {
-            plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
+        } else {
+            try {
+                Connection conn = getSQLiteConnection();
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setString(1, playerUUID.toString());
+                    ResultSet rs = pstmt.executeQuery();
+                    
+                    while (rs.next()) {
+                        String blockType = rs.getString("block_type");
+                        int count = rs.getInt("count");
+                        try {
+                            Material material = Material.valueOf(blockType);
+                            stats.put(material, count);
+                        } catch (IllegalArgumentException e) {
+                            // 無効なマテリアルは無視
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
+            }
         }
         
         return stats;
@@ -237,17 +305,34 @@ public class DatabaseManager {
     
     public int getTotalMined(UUID playerUUID) {
         String sql = "SELECT SUM(count) as total FROM mining_data WHERE player_uuid = ?";
+        String dbType = plugin.getConfig().getString("database.type", "sqlite");
         
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, playerUUID.toString());
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                return rs.getInt("total");
+        if (dbType.equalsIgnoreCase("mysql")) {
+            try (Connection conn = getMySQLConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, playerUUID.toString());
+                ResultSet rs = pstmt.executeQuery();
+                
+                if (rs.next()) {
+                    return rs.getInt("total");
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("総採掘数取得エラー: " + e.getMessage());
             }
-        } catch (SQLException e) {
-            plugin.getLogger().warning("総採掘数取得エラー: " + e.getMessage());
+        } else {
+            try {
+                Connection conn = getSQLiteConnection();
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setString(1, playerUUID.toString());
+                    ResultSet rs = pstmt.executeQuery();
+                    
+                    if (rs.next()) {
+                        return rs.getInt("total");
+                    }
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("総採掘数取得エラー: " + e.getMessage());
+            }
         }
         
         return 0;
@@ -260,20 +345,40 @@ public class DatabaseManager {
                      "GROUP BY player_uuid, player_name " +
                      "ORDER BY total DESC " +
                      "LIMIT ? OFFSET ?";
+        String dbType = plugin.getConfig().getString("database.type", "sqlite");
         
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, limit);
-            pstmt.setInt(2, offset);
-            ResultSet rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                String playerName = rs.getString("player_name");
-                int total = rs.getInt("total");
-                rankings.add(new PlayerRanking(playerName, total));
+        if (dbType.equalsIgnoreCase("mysql")) {
+            try (Connection conn = getMySQLConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, limit);
+                pstmt.setInt(2, offset);
+                ResultSet rs = pstmt.executeQuery();
+                
+                while (rs.next()) {
+                    String playerName = rs.getString("player_name");
+                    int total = rs.getInt("total");
+                    rankings.add(new PlayerRanking(playerName, total));
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("ランキング取得エラー: " + e.getMessage());
             }
-        } catch (SQLException e) {
-            plugin.getLogger().warning("ランキング取得エラー: " + e.getMessage());
+        } else {
+            try {
+                Connection conn = getSQLiteConnection();
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setInt(1, limit);
+                    pstmt.setInt(2, offset);
+                    ResultSet rs = pstmt.executeQuery();
+                    
+                    while (rs.next()) {
+                        String playerName = rs.getString("player_name");
+                        int total = rs.getInt("total");
+                        rankings.add(new PlayerRanking(playerName, total));
+                    }
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("ランキング取得エラー: " + e.getMessage());
+            }
         }
         
         return rankings;
@@ -281,16 +386,32 @@ public class DatabaseManager {
     
     public int getTotalPlayers() {
         String sql = "SELECT COUNT(DISTINCT player_uuid) as count FROM mining_data";
+        String dbType = plugin.getConfig().getString("database.type", "sqlite");
         
-        try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            
-            if (rs.next()) {
-                return rs.getInt("count");
+        if (dbType.equalsIgnoreCase("mysql")) {
+            try (Connection conn = getMySQLConnection();
+                 Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
+                
+                if (rs.next()) {
+                    return rs.getInt("count");
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("プレイヤー数取得エラー: " + e.getMessage());
             }
-        } catch (SQLException e) {
-            plugin.getLogger().warning("プレイヤー数取得エラー: " + e.getMessage());
+        } else {
+            try {
+                Connection conn = getSQLiteConnection();
+                try (Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery(sql)) {
+                    
+                    if (rs.next()) {
+                        return rs.getInt("count");
+                    }
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("プレイヤー数取得エラー: " + e.getMessage());
+            }
         }
         
         return 0;
@@ -298,24 +419,49 @@ public class DatabaseManager {
     
     public void resetPlayerStats(UUID playerUUID) {
         String sql = "DELETE FROM mining_data WHERE player_uuid = ?";
+        String dbType = plugin.getConfig().getString("database.type", "sqlite");
         
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, playerUUID.toString());
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            plugin.getLogger().warning("統計リセットエラー: " + e.getMessage());
+        if (dbType.equalsIgnoreCase("mysql")) {
+            try (Connection conn = getMySQLConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, playerUUID.toString());
+                pstmt.executeUpdate();
+            } catch (SQLException e) {
+                plugin.getLogger().warning("統計リセットエラー: " + e.getMessage());
+            }
+        } else {
+            try {
+                Connection conn = getSQLiteConnection();
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setString(1, playerUUID.toString());
+                    pstmt.executeUpdate();
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("統計リセットエラー: " + e.getMessage());
+            }
         }
     }
     
     public void resetAllStats() {
         String sql = "DELETE FROM mining_data";
+        String dbType = plugin.getConfig().getString("database.type", "sqlite");
         
-        try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate(sql);
-        } catch (SQLException e) {
-            plugin.getLogger().warning("全統計リセットエラー: " + e.getMessage());
+        if (dbType.equalsIgnoreCase("mysql")) {
+            try (Connection conn = getMySQLConnection();
+                 Statement stmt = conn.createStatement()) {
+                stmt.executeUpdate(sql);
+            } catch (SQLException e) {
+                plugin.getLogger().warning("全統計リセットエラー: " + e.getMessage());
+            }
+        } else {
+            try {
+                Connection conn = getSQLiteConnection();
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.executeUpdate(sql);
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("全統計リセットエラー: " + e.getMessage());
+            }
         }
     }
     
