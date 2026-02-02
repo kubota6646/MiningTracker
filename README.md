@@ -8,7 +8,7 @@ Minecraft 1.21.x対応のプレイヤー採掘トラッキングプラグイン
 
 ## バージョン情報
 
-- **最新バージョン**: 2.0.0
+- **最新バージョン**: 2.1.0
 - **対応Minecraft**: 1.21.x
 - **必須Java**: 21以降
 
@@ -16,12 +16,14 @@ Minecraft 1.21.x対応のプレイヤー採掘トラッキングプラグイン
 
 MiningTrackerは、各プレイヤーがどのブロックをどれだけ採掘したかを記録し、ランキング形式で表示するMinecraftプラグインです。
 
-## 機能
+## 主な機能
 
 - **採掘トラッキング**: プレイヤーが破壊したブロックを自動的に記録
 - **統計表示**: 自分や他のプレイヤーの採掘統計をコマンドで確認
 - **ランキング表示**: 全プレイヤーの採掘量をランキング形式で表示
-- **データ永続化**: SQLiteデータベースを使用してデータを保存
+- **マルチサーバー対応**: 複数サーバー間でデータを統合管理
+- **Plan連携**: Plan Player Analyticsと統合してWebダッシュボードに統計を表示 ⭐ NEW
+- **データ永続化**: SQLiteまたはMySQLデータベースを使用
 - **柔軟な設定**: config.ymlで動作をカスタマイズ可能
 
 ## 動作環境
@@ -31,6 +33,7 @@ MiningTrackerは、各プレイヤーがどのブロックをどれだけ採掘�
 - Gradle バージョン: 8.5以降
 - サーバー: Spigot/Paper 1.21.x
 - MySQL サーバー（オプション）: 5.7以降または8.0以降
+- **Plan Player Analytics**（オプション）: 5.6以降
 
 **セキュリティ**: MySQL使用時はMySQL Connector/J 8.3.0を使用しています（脆弱性修正済み）。
 
@@ -92,11 +95,42 @@ gradle build
 | `miningtracker.other` | 他のプレイヤーの統計を閲覧 | true |
 | `miningtracker.reset` | 統計をリセット | op |
 
+## Plan Player Analytics 連携
+
+MiningTracker v2.1.0以降では、[Plan Player Analytics](https://github.com/plan-player-analytics/Plan)プラグインと連携して、
+Webダッシュボードで採掘統計を視覚的に表示できます。
+
+### 表示される統計
+
+- **プレイヤーページ**: 個人の採掘統計（全サーバー合計・サーバー別）
+- **サーバーページ**: サーバーごとの採掘統計とランキング
+- **ネットワークページ**: 全サーバー合計統計とサーバー比較
+
+### マルチサーバー対応
+
+複数のサーバーを運用している場合、各サーバーで異なる`server-name`を設定することで、
+サーバー別の統計を取得しつつ、全サーバーのデータを統合できます。
+
+```yaml
+# サーバーAのconfig.yml
+server-name: "survival"
+
+# サーバーBのconfig.yml
+server-name: "creative"
+```
+
+ゲーム内コマンド（`/mtstats`, `/mtranking`）は**全サーバー合計**のデータを表示します。
+
+**詳細**: [PLAN_INTEGRATION.md](PLAN_INTEGRATION.md)を参照してください。
+
 ## 設定
 
 ### config.yml
 
 ```yaml
+# サーバー名設定（マルチサーバー環境で使用）
+server-name: "default"
+
 # データベース設定
 database:
   type: sqlite              # データベースタイプ (sqlite または mysql)

@@ -1,5 +1,91 @@
 # 変更履歴 / Changelog
 
+## [2.1.0] - 2026-02-02
+
+### 🎉 新機能 / New Features
+
+#### Plan Player Analytics 連携 ⭐
+- **Plan Player Analyticsとの統合**
+  - Webダッシュボードで採掘統計を視覚的に表示
+  - プレイヤー個別ページ、サーバーページ、ネットワークページに対応
+
+#### マルチサーバー対応
+- **サーバー別データ記録**
+  - 各サーバーでの採掘を個別に記録
+  - `server-name`設定でサーバーを識別
+  - MySQLで複数サーバーのデータを統合管理
+
+#### データベーススキーマ更新
+- **server_nameカラムを追加**
+  - どのサーバーでの採掘かを記録
+  - 自動マイグレーション処理を実装
+  - 既存データは`server_name = 'default'`として保存
+
+### 追加されたPlan統計
+
+**プレイヤー別:**
+- 総採掘ブロック数（全サーバー合計）
+- 総採掘ブロック数（このサーバーのみ）
+- 採掘ランキング順位（ネットワーク全体）
+- ブロックタイプ別内訳テーブル（サーバー別・全サーバー合計）
+
+**サーバー別:**
+- サーバー総採掘数
+- アクティブマイナー数
+- サーバー内トップランキング
+
+**ネットワーク全体:**
+- 全サーバー合計採掘数
+- 全サーバーマイナー数
+- ネットワーク全体のトップランキング
+- サーバー比較テーブル
+
+### 既存機能の改善
+
+#### コマンドの動作変更
+- `/mtstats` - 全サーバー合計の統計を表示
+- `/mtranking` - 全サーバー合計のランキングを表示
+
+### 技術的な変更
+
+- Plan API 5.6.3027 を依存関係に追加
+- HikariCP接続プール統合（MySQL）
+- DatabaseManagerに17の新しいメソッドを追加
+  - `getTotalMinedAllServers(UUID)`
+  - `getTotalMinedByServer(UUID, String)`
+  - `getPlayerRank(UUID)`
+  - `getPlayerStatsByServer(UUID, String)`
+  - `getPlayerStatsAllServers(UUID)`
+  - `getServerTotalMined(String)`
+  - `getServerPlayerCount(String)`
+  - `getTopPlayersByServer(String, int)`
+  - `getNetworkTotalMined()`
+  - `getNetworkPlayerCount()`
+  - `getTopPlayersAllServers(int)`
+  - `getAllServerStats()`
+  - その他サポートメソッド
+
+### ドキュメント
+
+- **PLAN_INTEGRATION.md** - Plan連携の完全ガイド
+  - セットアップ手順
+  - マルチサーバー設定
+  - データの見方
+  - トラブルシューティング
+  - API使用例
+
+### アップグレード
+
+v2.0.x → v2.1.0:
+1. プラグインJARを置き換え
+2. サーバーを起動（自動マイグレーション実行）
+3. config.ymlで`server-name`を設定（オプション）
+4. Plan（オプション）をインストールして連携
+
+既存データは自動的に移行され、`server_name = 'default'`として保存されます。
+
+---
+
 ## [2.0.3] - 2026-02-02
 
 ### 🐛 重要なバグ修正 / Critical Bug Fix
