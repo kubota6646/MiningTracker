@@ -1,5 +1,50 @@
 # 変更履歴 / Changelog
 
+## [2.0.3] - 2026-02-02
+
+### 🐛 重要なバグ修正 / Critical Bug Fix
+
+#### 修正 / Fixed
+- **HikariCP接続リーク**: MySQL接続プールからの接続リークを修正
+- HikariCPの接続リーク検出警告を解消
+
+#### 問題 / Problem
+```
+[WARN]: [com.zaxxer.hikari.pool.ProxyLeakTask] Connection leak detection triggered
+```
+
+connectMySQL()メソッドで接続プールから取得した接続を`connection`フィールドに保存し、
+プールに返却していなかった。これによりHikariCPが60秒後に接続リークを検出。
+
+#### 技術的詳細 / Technical Details
+- `connectMySQL()`で`connection = hikariDataSource.getConnection()`を削除
+- テーブル作成時に接続を一時的に取得し、使用後すぐに返却（try-with-resources）
+- `createTablesForMySQL(Connection)`メソッドを追加
+- `connection`フィールドはSQLiteのみで使用（MySQLでは使用しない）
+
+#### 変更内容
+```java
+// 修正前（v2.0.2）- 接続リーク
+hikariDataSource = new HikariDataSource(hikariConfig);
+connection = hikariDataSource.getConnection(); // ❌ プールに返却されない
+createTables();
+
+// 修正後（v2.0.3）- 正しい使用方法
+hikariDataSource = new HikariDataSource(hikariConfig);
+try (Connection conn = hikariDataSource.getConnection()) { // ✅ 自動的に返却
+    createTablesForMySQL(conn);
+}
+```
+
+#### 影響 / Impact
+- ✅ 接続リーク警告が解消
+- ✅ 接続プールの効率的な使用
+- ✅ 長時間稼働時のパフォーマンス向上
+- ✅ プール内の利用可能な接続数が正常に維持
+- ⚠️ 設定ファイルの変更は不要
+
+---
+
 ## [2.0.2] - 2026-02-02
 
 ### 🐛 重要なバグ修正 / Critical Bug Fix

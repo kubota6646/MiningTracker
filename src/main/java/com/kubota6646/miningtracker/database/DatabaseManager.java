@@ -98,8 +98,11 @@ public class DatabaseManager {
         
         try {
             hikariDataSource = new HikariDataSource(hikariConfig);
-            connection = hikariDataSource.getConnection();
-            createTables();
+            
+            // テーブルを作成（接続を一時的に取得し、すぐに返却）
+            try (Connection conn = hikariDataSource.getConnection()) {
+                createTablesForMySQL(conn);
+            }
             
             plugin.getLogger().info("MySQLデータベースに接続しました（HikariCP使用）。");
             plugin.getLogger().info("接続プール設定: 最大=" + maxPoolSize + ", 最小=" + minIdle);
@@ -205,6 +208,26 @@ public class DatabaseManager {
                 stmt.execute("CREATE INDEX IF NOT EXISTS idx_player_uuid ON mining_data(player_uuid)");
                 stmt.execute("CREATE INDEX IF NOT EXISTS idx_block_type ON mining_data(block_type)");
             }
+        }
+    }
+    
+    /**
+     * MySQL用のテーブル作成（指定された接続を使用）
+     */
+    private void createTablesForMySQL(Connection conn) throws SQLException {
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS mining_data (" +
+                "id INT AUTO_INCREMENT PRIMARY KEY," +
+                "player_uuid VARCHAR(36) NOT NULL," +
+                "player_name VARCHAR(16) NOT NULL," +
+                "block_type VARCHAR(64) NOT NULL," +
+                "count INT NOT NULL DEFAULT 0," +
+                "UNIQUE KEY unique_player_block (player_uuid, block_type)," +
+                "INDEX idx_player_uuid (player_uuid)," +
+                "INDEX idx_block_type (block_type)" +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+        
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute(createTableSQL);
         }
     }
     
