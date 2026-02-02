@@ -2,9 +2,17 @@
 
 ## 現在のバージョン
 
-**v2.1.3** (2026-02-02)
+**v2.1.4** (2026-02-02)
 
 ## バージョン履歴
+
+### v2.1.4 - DataExtension登録方法の完全修正 (2026-02-02)
+- **重要なバグ修正**: Plan API登録メソッドを正しい方法に変更
+- `CapabilityService.registerExtension()` → `ExtensionService.register()` に変更
+- Plan API 5.6公式ドキュメントに準拠した登録方法を実装
+- 適切なエラーハンドリング（NoClassDefFoundError, IllegalStateException, IllegalArgumentException）
+- ビルドエラーを完全に解消
+- Plan連携機能が公式推奨方法で正常に動作
 
 ### v2.1.3 - CapabilityService.registerExtension メソッド修正 (2026-02-02)
 - **重要なバグ修正**: Plan API registerExtensionメソッドのシグネチャ修正

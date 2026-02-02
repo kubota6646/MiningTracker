@@ -1,5 +1,30 @@
 # 変更履歴 / Changelog
 
+## [2.1.4] - 2026-02-02
+
+### 🔧 修正 / Fixes
+
+#### DataExtension登録方法の完全修正
+- **問題**: MiningTrackerExtension.javaでコンパイルエラーが発生
+  - `CapabilityService.registerExtension(MiningTrackerExtension)` メソッドが存在しない
+  - エラー: "シンボルを見つけられません: メソッド registerExtension(MiningTrackerExtension)"
+- **根本原因**:
+  - Plan API 5.6では`CapabilityService`ではなく`ExtensionService`を使用する必要がある
+  - 正しいメソッド: `ExtensionService.getInstance().register(DataExtension)`
+- **修正内容**:
+  - `CapabilityService`を`ExtensionService`に変更
+  - `registerExtension()`を`register()`に変更
+  - `registerEnableListener`の使用を削除（ExtensionServiceが自動的に処理）
+  - 適切なエラーハンドリングを追加（NoClassDefFoundError, IllegalStateException, IllegalArgumentException）
+- **影響**: ビルドが正常に完了し、Plan連携が公式推奨方法で動作
+
+### 📚 技術詳細
+- Plan API 5.6公式ドキュメントに準拠した登録方法
+- `ExtensionService.getInstance().register()` が正しいAPI
+- Planがインストールされていない場合の適切なエラーハンドリング
+
+---
+
 ## [2.1.3] - 2026-02-02
 
 ### 🔧 修正 / Fixes

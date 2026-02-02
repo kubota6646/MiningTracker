@@ -1,6 +1,6 @@
 package com.kubota6646.miningtracker.plan;
 
-import com.djrapitops.plan.capability.CapabilityService;
+import com.djrapitops.plan.extension.ExtensionService;
 import com.djrapitops.plan.extension.CallEvents;
 import com.djrapitops.plan.extension.DataExtension;
 import com.djrapitops.plan.extension.ElementOrder;
@@ -45,18 +45,17 @@ public class MiningTrackerExtension implements DataExtension {
      */
     public void register() {
         try {
-            CapabilityService.getInstance().registerEnableListener(isPlanEnabled -> {
-                if (isPlanEnabled) {
-                    try {
-                        CapabilityService.getInstance().registerExtension(this);
-                        plugin.getLogger().info("Plan拡張機能を正常に登録しました");
-                    } catch (Exception e) {
-                        plugin.getLogger().warning("Plan拡張機能の登録に失敗しました: " + e.getMessage());
-                    }
-                }
-            });
-        } catch (Exception e) {
-            plugin.getLogger().warning("Plan registerEnableListenerに失敗しました: " + e.getMessage());
+            ExtensionService.getInstance().register(this);
+            plugin.getLogger().info("Plan拡張機能を正常に登録しました");
+        } catch (NoClassDefFoundError e) {
+            // Planがインストールされていない場合
+            plugin.getLogger().info("Planがインストールされていないため、Plan連携機能は無効です");
+        } catch (IllegalStateException e) {
+            // Planが有効化されていない場合
+            plugin.getLogger().warning("Planが有効化されていません: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            // DataExtension実装に問題がある場合
+            plugin.getLogger().warning("Plan拡張機能の実装に問題があります: " + e.getMessage());
         }
     }
     
