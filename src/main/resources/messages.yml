@@ -1,0 +1,51 @@
+# MiningTracker メッセージファイル
+
+# プラグイン共通メッセージ
+plugin:
+  prefix: "&8[&6MiningTracker&8]&r "
+  reload: "&a設定をリロードしました。"
+  no-permission: "&c権限がありません。"
+  player-not-found: "&cプレイヤー &e{player}&c が見つかりません。"
+  player-no-data: "&cプレイヤー &e{player}&c のデータがありません。"
+
+# 統計表示メッセージ
+stats:
+  header: "&6==== &e{player}&6 の採掘統計 ===="
+  total: "&a総採掘数: &e{total}&a ブロック"
+  top-blocks-header: "&6トップ5ブロック:"
+  block-entry: "&7{rank}. &e{block}&7: &a{count}&7 個"
+  footer: "&6========================"
+  self: "&7あなたの採掘統計:"
+  other: "&7{player}の採掘統計:"
+
+# ランキングメッセージ
+ranking:
+  header: "&6==== &e採掘ランキング &7(ページ {page}/{total_pages}) &6===="
+  entry: "&7{rank}. &e{player}&7: &a{count}&7 ブロック"
+  footer: "&6ページ移動: &e/mtranking <ページ番号>"
+  empty: "&7採掘データがありません。"
+  invalid-page: "&cページ番号が無効です。"
+
+# リセットメッセージ
+reset:
+  success-player: "&aプレイヤー &e{player}&a の統計をリセットしました。"
+  success-all: "&a全プレイヤーの統計をリセットしました。"
+  confirm: "&c本当にリセットしますか？ &e/mtreset {target} confirm"
+  usage: "&c使用方法: /mtreset <プレイヤー名|all> [confirm]"
+
+# データベースメッセージ
+database:
+  connected: "&aデータベースに接続しました。"
+  error: "&cデータベースエラーが発生しました。"
+  saved: "&aデータを保存しました。"
+
+# トラッキングメッセージ
+tracking:
+  enabled: "&a採掘トラッキングが有効になりました。"
+  disabled: "&c採掘トラッキングが無効になりました。"
+
+# コマンドヘルプ
+help:
+  mtstats: "&e/mtstats [プレイヤー名] &7- 採掘統計を表示"
+  mtranking: "&e/mtranking [ページ] &7- 採掘ランキングを表示"
+  mtreset: "&e/mtreset <プレイヤー名|all> &7- 統計をリセット"
