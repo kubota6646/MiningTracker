@@ -1,5 +1,10 @@
 # MiningTracker 設定ファイル
 
+# サーバー名設定（マルチサーバー環境で使用）
+# Planと連携する場合、各サーバーで異なる名前を設定してください
+# 例: "survival", "creative", "lobby" など
+server-name: "default"
+
 # データベース設定
 database:
   # データベースタイプ (sqlite または mysql)
