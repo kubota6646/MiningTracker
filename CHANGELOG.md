@@ -1,5 +1,32 @@
 # 変更履歴 / Changelog
 
+## [2.1.5] - 2026-02-02
+
+### 🔧 修正 / Critical Fix
+
+#### Plan拡張データが表示されない問題を修正
+- **問題**: Paper 1.21.8環境でPlanに「Extension Dataが存在しません」と表示される
+  - MiningTrackerのデータがPlanに反映されない
+  - プレイヤー統計が表示されない
+- **根本原因**:
+  - `MiningTracker.java`で古い`CapabilityService`を使用していた
+  - `registerEnableListener`で非同期登録していたため、タイミングの問題が発生
+  - 不要な`callExtensionMethodsOn()`メソッドがあった
+- **修正内容**:
+  - `MiningTracker.java`から`CapabilityService`インポートを削除
+  - `registerPlanHook()`メソッドを簡素化し、直接`ExtensionService.register()`を呼び出し
+  - `MiningTrackerExtension.java`から不要な`callExtensionMethodsOn()`メソッドを削除
+  - `CallEvents`インポートを削除
+  - エラーハンドリングを改善（スタックトレース出力追加）
+- **影響**: Plan拡張データが正常に表示され、統計情報がWebダッシュボードに反映される
+
+### 📚 技術詳細
+- CapabilityService（機能チェック用）とExtensionService（登録用）の違いを明確化
+- 同期的な登録方法により、タイミング問題を解消
+- シンプルで確実な実装パターンに変更
+
+---
+
 ## [2.1.4] - 2026-02-02
 
 ### 🔧 修正 / Fixes
