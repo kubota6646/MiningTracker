@@ -1,5 +1,6 @@
 package com.kubota6646.miningtracker;
 
+import com.djrapitops.plan.capability.CapabilityService;
 import com.kubota6646.miningtracker.commands.StatsCommand;
 import com.kubota6646.miningtracker.commands.RankingCommand;
 import com.kubota6646.miningtracker.commands.ResetCommand;
@@ -7,6 +8,7 @@ import com.kubota6646.miningtracker.database.DatabaseManager;
 import com.kubota6646.miningtracker.listeners.BlockBreakListener;
 import com.kubota6646.miningtracker.managers.MessageManager;
 import com.kubota6646.miningtracker.managers.DataManager;
+import com.kubota6646.miningtracker.plan.MiningTrackerExtension;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MiningTracker extends JavaPlugin {
@@ -43,6 +45,9 @@ public class MiningTracker extends JavaPlugin {
         getCommand("mtranking").setExecutor(new RankingCommand(this));
         getCommand("mtreset").setExecutor(new ResetCommand(this));
         
+        // Plan連携の登録
+        registerPlanHook();
+        
         getLogger().info("MiningTracker が有効化されました。");
     }
     
@@ -54,6 +59,32 @@ public class MiningTracker extends JavaPlugin {
         }
         
         getLogger().info("MiningTracker が無効化されました。");
+    }
+    
+    /**
+     * Plan Player Analyticsとの連携を登録
+     */
+    private void registerPlanHook() {
+        try {
+            if (getServer().getPluginManager().getPlugin("Plan") != null) {
+                CapabilityService.getInstance().registerEnableListener(
+                    isPlanEnabled -> {
+                        if (isPlanEnabled) {
+                            try {
+                                MiningTrackerExtension extension = new MiningTrackerExtension(this);
+                                extension.register();
+                                getLogger().info("Plan Player Analyticsとの連携を有効化しました。");
+                            } catch (Exception e) {
+                                getLogger().warning("Plan連携の登録に失敗しました: " + e.getMessage());
+                            }
+                        }
+                    }
+                );
+            }
+        } catch (Exception e) {
+            // Planが存在しない場合や、エラーが発生した場合は無視
+            getLogger().info("Plan Player Analyticsが見つかりません。通常モードで動作します。");
+        }
     }
     
     public static MiningTracker getInstance() {

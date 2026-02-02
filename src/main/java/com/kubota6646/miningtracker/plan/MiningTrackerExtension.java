@@ -1,5 +1,6 @@
 package com.kubota6646.miningtracker.plan;
 
+import com.djrapitops.plan.capability.CapabilityService;
 import com.djrapitops.plan.extension.CallEvents;
 import com.djrapitops.plan.extension.DataExtension;
 import com.djrapitops.plan.extension.annotation.*;
@@ -36,6 +37,17 @@ public class MiningTrackerExtension implements DataExtension {
     public MiningTrackerExtension(MiningTracker plugin) {
         this.plugin = plugin;
         this.database = plugin.getDatabaseManager();
+    }
+    
+    /**
+     * Planに拡張機能を登録
+     */
+    public void register() {
+        try {
+            CapabilityService.getInstance().registerExtension(this);
+        } catch (Exception e) {
+            plugin.getLogger().warning("Plan拡張機能の登録に失敗しました: " + e.getMessage());
+        }
     }
     
     public CallEvents[] callExtensionMethodsOn() {
