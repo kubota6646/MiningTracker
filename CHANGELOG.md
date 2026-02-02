@@ -1,5 +1,25 @@
 # 変更履歴 / Changelog
 
+## [2.1.2] - 2026-02-02
+
+### 🔧 修正 / Fixes
+
+#### Plan APIコンパイルエラー修正
+- **問題**: MiningTrackerExtension.javaでコンパイルエラーが発生
+  - `ElementOrder` シンボルが見つからない（7個のエラー）
+  - `registerExtension()` メソッドが存在しない
+- **修正内容**:
+  - `ElementOrder` のインポートを追加
+  - `register()` メソッドをPlan API 5.6の正しい使用方法に修正
+  - `registerEnableListener()` を使用したDataExtension登録に変更
+- **影響**: ビルドが正常に完了し、Plan連携が正しく動作
+
+### 📚 ドキュメント更新
+- Plan API 5.6の正しい使用方法を記載
+- DataExtension登録パターンの説明を追加
+
+---
+
 ## [2.1.1] - 2026-02-02
 
 ### 🔧 修正 / Fixes
