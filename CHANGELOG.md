@@ -1,5 +1,23 @@
 # 変更履歴 / Changelog
 
+## [2.1.1] - 2026-02-02
+
+### 🔧 修正 / Fixes
+
+#### Plan依存関係の解決エラー修正
+- **問題**: Gradleプロジェクト同期時に`com.djrapitops:plan:5.6.3027`が見つからないエラー
+- **修正内容**:
+  - JitPackリポジトリを追加（`https://jitpack.io`）
+  - Plan依存関係を正しい形式に変更: `com.github.plan-player-analytics:Plan:5.6.2959`
+  - 旧リポジトリ（`repo.playeranalytics.net`）を削除
+- **影響**: ビルドが正常に動作するようになる
+
+### 📚 ドキュメント更新
+- PLAN_INTEGRATION.mdに開発者向けビルド設定セクションを追加
+- 正しいPlan依存関係の設定方法を記載
+
+---
+
 ## [2.1.0] - 2026-02-02
 
 ### 🎉 新機能 / New Features

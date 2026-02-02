@@ -283,6 +283,49 @@ long serverMined = db.getTotalMinedByServer(playerUUID, serverName);
 long networkTotal = db.getNetworkTotalMined();
 ```
 
+## 開発者向け：ビルド設定
+
+MiningTrackerをソースからビルドする場合、以下の依存関係が必要です。
+
+### build.gradle 設定
+
+```gradle
+repositories {
+    mavenCentral()
+    maven {
+        name = 'papermc'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+    maven {
+        name = 'jitpack'
+        url = 'https://jitpack.io'
+    }
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
+    compileOnly 'com.github.plan-player-analytics:Plan:5.6.2959'
+    implementation 'com.mysql:mysql-connector-j:8.3.0'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+    implementation 'org.slf4j:slf4j-simple:2.0.9'
+}
+```
+
+### 重要なポイント
+
+1. **JitPackリポジトリ**: Planの依存関係を解決するために必要
+2. **Plan依存関係**: `com.github.plan-player-analytics:Plan:{version}` 形式を使用
+3. **最新バージョン**: [Plan GitHub Tags](https://github.com/plan-player-analytics/Plan/tags)で確認
+4. **compileOnly**: Planはランタイムで提供されるため、JARに含めない
+
+### ビルドコマンド
+
+```bash
+./gradlew clean build
+```
+
+生成されるJARファイル: `build/libs/MiningTracker-2.1.0.jar`
+
 ## 参考リンク
 
 - **Plan Player Analytics**: https://github.com/plan-player-analytics/Plan
