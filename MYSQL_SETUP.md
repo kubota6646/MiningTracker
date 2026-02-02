@@ -86,6 +86,20 @@ java -jar server.jar
 [MiningTracker] MiningTracker が有効化されました。
 ```
 
+### ⚠️ トラブルシューティング: 文字エンコーディングエラー
+
+**エラーメッセージ:**
+```
+com.zaxxer.hikari.pool.HikariPool$PoolInitializationException: 
+Failed to initialize pool: Unsupported character encoding 'utf8mb4'
+```
+
+**原因と解決:**
+このエラーはv2.0.0の初期リリースで発生していましたが、修正されています。
+最新バージョン（v2.0.1以降）を使用してください。
+
+技術的な詳細については、[HIKARICP_FIX.md](HIKARICP_FIX.md)を参照してください。
+
 ## リモートMySQLサーバーを使用する場合
 
 ### MySQLサーバー側の設定

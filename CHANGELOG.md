@@ -1,5 +1,36 @@
 # 変更履歴 / Changelog
 
+## [2.0.1] - 2026-02-02
+
+### 🐛 バグ修正 / Bug Fixes
+
+#### 修正 / Fixed
+- **HikariCP接続エラー**: MySQL接続時の`Unsupported character encoding 'utf8mb4'`エラーを修正
+- **SQLite接続管理**: SQLiteデータベース接続のライフサイクル管理を改善
+- 接続パラメータ（characterEncoding、useSSL、serverTimezoneなど）をJDBC URLパラメータとして正しく設定
+
+#### 技術的詳細 / Technical Details
+- `characterEncoding`をDataSourceプロパティからJDBC URLパラメータに移動
+- HikariCPの設定を正しく分離:
+  - JDBC URLパラメータ: 接続レベルの設定（SSL、タイムゾーン、文字エンコーディング）
+  - DataSourceプロパティ: パフォーマンス最適化設定（キャッシュ設定など）
+- SQLite: 永続的な接続を維持するように改善
+- MySQL: 接続プール管理を最適化
+
+#### ドキュメント / Documentation
+- HIKARICP_FIX.md: HikariCP設定の詳細ガイドを追加
+- MYSQL_SETUP.md: トラブルシューティングセクションを追加
+- SQLITE_FIX.md: SQLite接続問題の解決方法を追加
+
+#### 影響 / Impact
+- ✅ MySQL接続が正常に動作
+- ✅ UTF-8MB4文字エンコーディングが正しく適用
+- ✅ 日本語データの保存・取得が正常に動作
+- ✅ SQLiteデータベース操作が安定
+- ⚠️ 設定ファイルの変更は不要
+
+---
+
 ## [2.0.0] - 2026-02-01
 
 ### 🎉 メジャーアップデート - Minecraft 1.21.x対応

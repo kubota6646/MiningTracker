@@ -2,9 +2,15 @@
 
 ## 現在のバージョン
 
-**v2.0.0** (2026-02-01)
+**v2.0.1** (2026-02-02)
 
 ## バージョン履歴
+
+### v2.0.1 - HikariCP修正 (2026-02-02)
+- **バグ修正**: HikariCP文字エンコーディング設定エラーを修正
+- MySQL接続時の`Unsupported character encoding 'utf8mb4'`エラーを解決
+- 接続パラメータをJDBC URLに移動（DataSourceプロパティから）
+- SQLite接続ライフサイクル管理の改善
 
 ### v2.0.0 - Minecraft 1.21.x対応 (2026-02-01)
 - Minecraft 1.21.x完全対応
