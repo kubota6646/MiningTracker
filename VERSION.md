@@ -2,9 +2,15 @@
 
 ## 現在のバージョン
 
-**v2.1.2** (2026-02-02)
+**v2.1.3** (2026-02-02)
 
 ## バージョン履歴
+
+### v2.1.3 - CapabilityService.registerExtension メソッド修正 (2026-02-02)
+- **重要なバグ修正**: Plan API registerExtensionメソッドのシグネチャ修正
+- `registerExtension(String, DataExtension)` → `registerExtension(DataExtension)` に変更
+- プラグイン名パラメータを削除（@PluginInfoアノテーションで指定済みのため）
+- ビルドエラーを完全に解消
 
 ### v2.1.2 - Plan APIコンパイルエラー修正 (2026-02-02)
 - **重要なバグ修正**: Plan APIのコンパイルエラーを修正

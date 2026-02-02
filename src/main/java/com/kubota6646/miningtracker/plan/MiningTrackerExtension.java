@@ -48,7 +48,7 @@ public class MiningTrackerExtension implements DataExtension {
             CapabilityService.getInstance().registerEnableListener(isPlanEnabled -> {
                 if (isPlanEnabled) {
                     try {
-                        CapabilityService.getInstance().registerExtension(plugin.getName(), this);
+                        CapabilityService.getInstance().registerExtension(this);
                         plugin.getLogger().info("Plan拡張機能を正常に登録しました");
                     } catch (Exception e) {
                         plugin.getLogger().warning("Plan拡張機能の登録に失敗しました: " + e.getMessage());

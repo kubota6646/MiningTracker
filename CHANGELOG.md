@@ -1,5 +1,25 @@
 # 変更履歴 / Changelog
 
+## [2.1.3] - 2026-02-02
+
+### 🔧 修正 / Fixes
+
+#### CapabilityService.registerExtension メソッドシグネチャ修正
+- **問題**: MiningTrackerExtension.javaでコンパイルエラーが発生
+  - `registerExtension(String, MiningTrackerExtension)` メソッドが存在しない
+  - エラー: "シンボルを見つけられません: メソッド registerExtension(String,MiningTrackerExtension)"
+- **修正内容**:
+  - `registerExtension()` の呼び出しからプラグイン名パラメータを削除
+  - 正しいメソッドシグネチャ: `registerExtension(DataExtension)` のみを使用
+  - `@PluginInfo` アノテーションでプラグイン名が指定されているため、明示的に渡す必要なし
+- **影響**: ビルドが正常に完了し、Plan連携が正しく動作
+
+### 📚 技術詳細
+- Plan API 5.6の正しいメソッドシグネチャを使用
+- `@PluginInfo` アノテーションがプラグインの識別情報を提供
+
+---
+
 ## [2.1.2] - 2026-02-02
 
 ### 🔧 修正 / Fixes
