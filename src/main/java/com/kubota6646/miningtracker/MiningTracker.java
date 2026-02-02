@@ -1,6 +1,5 @@
 package com.kubota6646.miningtracker;
 
-import com.djrapitops.plan.capability.CapabilityService;
 import com.kubota6646.miningtracker.commands.StatsCommand;
 import com.kubota6646.miningtracker.commands.RankingCommand;
 import com.kubota6646.miningtracker.commands.ResetCommand;
@@ -66,24 +65,20 @@ public class MiningTracker extends JavaPlugin {
      */
     private void registerPlanHook() {
         try {
+            // Planプラグインが存在するか確認
             if (getServer().getPluginManager().getPlugin("Plan") != null) {
-                CapabilityService.getInstance().registerEnableListener(
-                    isPlanEnabled -> {
-                        if (isPlanEnabled) {
-                            try {
-                                MiningTrackerExtension extension = new MiningTrackerExtension(this);
-                                extension.register();
-                                getLogger().info("Plan Player Analyticsとの連携を有効化しました。");
-                            } catch (Exception e) {
-                                getLogger().warning("Plan連携の登録に失敗しました: " + e.getMessage());
-                            }
-                        }
-                    }
-                );
+                // DataExtensionを作成して登録
+                MiningTrackerExtension extension = new MiningTrackerExtension(this);
+                extension.register();
+            } else {
+                getLogger().info("Plan Player Analyticsが見つかりません。通常モードで動作します。");
             }
-        } catch (Exception e) {
-            // Planが存在しない場合や、エラーが発生した場合は無視
+        } catch (NoClassDefFoundError e) {
+            // Planのクラスが見つからない場合（Planがインストールされていない）
             getLogger().info("Plan Player Analyticsが見つかりません。通常モードで動作します。");
+        } catch (Exception e) {
+            // その他のエラー
+            getLogger().warning("Plan連携の初期化中にエラーが発生しました: " + e.getMessage());
         }
     }
     

@@ -1,7 +1,6 @@
 package com.kubota6646.miningtracker.plan;
 
 import com.djrapitops.plan.extension.ExtensionService;
-import com.djrapitops.plan.extension.CallEvents;
 import com.djrapitops.plan.extension.DataExtension;
 import com.djrapitops.plan.extension.ElementOrder;
 import com.djrapitops.plan.extension.annotation.*;
@@ -56,15 +55,8 @@ public class MiningTrackerExtension implements DataExtension {
         } catch (IllegalArgumentException e) {
             // DataExtension実装に問題がある場合
             plugin.getLogger().warning("Plan拡張機能の実装に問題があります: " + e.getMessage());
+            e.printStackTrace();
         }
-    }
-    
-    public CallEvents[] callExtensionMethodsOn() {
-        return new CallEvents[]{
-            CallEvents.PLAYER_JOIN,
-            CallEvents.PLAYER_LEAVE,
-            CallEvents.SERVER_PERIODICAL
-        };
     }
     
     // プレイヤー別データ
