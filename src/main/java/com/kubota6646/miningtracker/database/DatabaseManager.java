@@ -68,8 +68,14 @@ public class DatabaseManager {
         int minIdle = plugin.getConfig().getInt("database.mysql.pool.minimum-idle", 2);
         long connectionTimeout = plugin.getConfig().getLong("database.mysql.pool.connection-timeout", 30000);
         
+        // JDBC URLパラメータを構築（接続設定はURLに含める）
+        String jdbcUrl = String.format(
+            "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8mb4",
+            host, port, database
+        );
+        
         HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s", host, port, database));
+        hikariConfig.setJdbcUrl(jdbcUrl);
         hikariConfig.setUsername(username);
         hikariConfig.setPassword(password);
         hikariConfig.setMaximumPoolSize(maxPoolSize);
@@ -77,7 +83,7 @@ public class DatabaseManager {
         hikariConfig.setConnectionTimeout(connectionTimeout);
         hikariConfig.setLeakDetectionThreshold(60000);
         
-        // MySQL最適化設定
+        // MySQL最適化設定（DataSourceプロパティとして設定）
         hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
         hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
         hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
@@ -88,12 +94,6 @@ public class DatabaseManager {
         hikariConfig.addDataSourceProperty("cacheServerConfiguration", "true");
         hikariConfig.addDataSourceProperty("elideSetAutoCommits", "true");
         hikariConfig.addDataSourceProperty("maintainTimeStats", "false");
-        
-        // SSL設定
-        hikariConfig.addDataSourceProperty("useSSL", "false");
-        hikariConfig.addDataSourceProperty("allowPublicKeyRetrieval", "true");
-        hikariConfig.addDataSourceProperty("serverTimezone", "UTC");
-        hikariConfig.addDataSourceProperty("characterEncoding", "utf8mb4");
         
         try {
             hikariDataSource = new HikariDataSource(hikariConfig);
