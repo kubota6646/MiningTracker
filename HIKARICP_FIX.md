@@ -4,40 +4,45 @@
 
 ### エラーメッセージ
 ```
-[00:26:47] [Server thread/INFO]: [MiningTracker] Enabling MiningTracker v2.0.0
-[00:26:47] [Server thread/INFO]: [com.zaxxer.hikari.HikariDataSource] HikariPool-1 - Starting...
-[00:26:48] [Server thread/ERROR]: Error occurred while enabling MiningTracker v2.0.0 (Is it up to date?)
 com.zaxxer.hikari.pool.HikariPool$PoolInitializationException: Failed to initialize pool: Unsupported character encoding 'utf8mb4'
 ```
 
 ### 原因
+**v2.0.0-2.0.1での問題:**
 MySQL JDBC Driverでは、文字エンコーディングなどの接続パラメータはJDBC URL内で指定する必要があります。HikariCPの`addDataSourceProperty()`メソッドでこれらを設定すると、ドライバーが認識できずエラーになります。
 
-## 修正内容
+**v2.0.1でも発生する問題:**
+MySQL Connector/J 8.xでは、`characterEncoding`パラメータが非推奨（deprecated）となり、`utf8mb4`という値は認識されなくなりました。MySQL Connector/J 8.xではデフォルトでUTF-8（utf8mb4）が使用されるため、このパラメータは不要です。
 
-### 修正前のコード
+## 修正内容（v2.0.2）
+
+### MySQL Connector/J 8.x対応
+
+**問題のコード (v2.0.1):**
 ```java
-HikariConfig hikariConfig = new HikariConfig();
-hikariConfig.setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s", host, port, database));
-
-// ❌ これらはDataSourceプロパティとして認識されない
-hikariConfig.addDataSourceProperty("useSSL", "false");
-hikariConfig.addDataSourceProperty("allowPublicKeyRetrieval", "true");
-hikariConfig.addDataSourceProperty("serverTimezone", "UTC");
-hikariConfig.addDataSourceProperty("characterEncoding", "utf8mb4"); // エラーの原因
-```
-
-### 修正後のコード
-```java
-// ✅ JDBC URLパラメータとして接続設定を含める
 String jdbcUrl = String.format(
     "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8mb4",
     host, port, database
 );
-
-HikariConfig hikariConfig = new HikariConfig();
-hikariConfig.setJdbcUrl(jdbcUrl);
+// ❌ characterEncoding=utf8mb4 はMySQL Connector/J 8.xでサポートされていない
 ```
+
+**修正後のコード (v2.0.2):**
+```java
+// ✅ MySQL Connector/J 8.x用の正しい設定
+String jdbcUrl = String.format(
+    "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&connectionCollation=utf8mb4_unicode_ci",
+    host, port, database
+);
+// connectionCollation を使用（characterEncodingは削除）
+```
+
+### MySQL Connector/J バージョン別の違い
+
+| バージョン | 文字エンコーディング設定 | 説明 |
+|-----------|------------------------|------|
+| 5.x | `characterEncoding=utf8` または `utf8mb4` | characterEncodingパラメータが有効 |
+| 8.x | `connectionCollation=utf8mb4_unicode_ci` または省略 | characterEncodingは非推奨、デフォルトがutf8mb4 |
 
 ## HikariCPにおける設定の種類
 

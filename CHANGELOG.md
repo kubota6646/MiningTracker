@@ -1,33 +1,48 @@
 # 変更履歴 / Changelog
 
+## [2.0.2] - 2026-02-02
+
+### 🐛 重要なバグ修正 / Critical Bug Fix
+
+#### 修正 / Fixed
+- **MySQL Connector/J 8.x互換性**: `characterEncoding`パラメータを`connectionCollation`に変更
+- v2.0.1でも発生していた`Unsupported character encoding 'utf8mb4'`エラーを完全に修正
+
+#### 技術的詳細 / Technical Details
+- MySQL Connector/J 8.xでは`characterEncoding`パラメータが非推奨（deprecated）
+- `characterEncoding=utf8mb4`を`connectionCollation=utf8mb4_unicode_ci`に変更
+- MySQL Connector/J 8.xはデフォルトでUTF-8（utf8mb4）を使用するため、明示的な文字セット指定は不要だが、照合順序を指定することで日本語対応を確実にする
+
+#### 変更内容
+```java
+// v2.0.1 (問題あり)
+"jdbc:mysql://host:port/db?...&characterEncoding=utf8mb4"
+
+// v2.0.2 (修正後)
+"jdbc:mysql://host:port/db?...&connectionCollation=utf8mb4_unicode_ci"
+```
+
+#### 影響 / Impact
+- ✅ MySQL Connector/J 8.3.0との完全な互換性
+- ✅ MySQL接続が確実に成功
+- ✅ UTF-8MB4文字エンコーディングと照合順序が正しく適用
+- ✅ 日本語データの保存・取得が確実に動作
+- ⚠️ 設定ファイルの変更は不要
+
+---
+
 ## [2.0.1] - 2026-02-02
 
 ### 🐛 バグ修正 / Bug Fixes
 
 #### 修正 / Fixed
-- **HikariCP接続エラー**: MySQL接続時の`Unsupported character encoding 'utf8mb4'`エラーを修正
+- **HikariCP接続エラー**: MySQL接続時の`Unsupported character encoding 'utf8mb4'`エラーの修正を試みた（v2.0.2で完全修正）
 - **SQLite接続管理**: SQLiteデータベース接続のライフサイクル管理を改善
 - 接続パラメータ（characterEncoding、useSSL、serverTimezoneなど）をJDBC URLパラメータとして正しく設定
 
-#### 技術的詳細 / Technical Details
-- `characterEncoding`をDataSourceプロパティからJDBC URLパラメータに移動
-- HikariCPの設定を正しく分離:
-  - JDBC URLパラメータ: 接続レベルの設定（SSL、タイムゾーン、文字エンコーディング）
-  - DataSourceプロパティ: パフォーマンス最適化設定（キャッシュ設定など）
-- SQLite: 永続的な接続を維持するように改善
-- MySQL: 接続プール管理を最適化
-
-#### ドキュメント / Documentation
-- HIKARICP_FIX.md: HikariCP設定の詳細ガイドを追加
-- MYSQL_SETUP.md: トラブルシューティングセクションを追加
-- SQLITE_FIX.md: SQLite接続問題の解決方法を追加
-
-#### 影響 / Impact
-- ✅ MySQL接続が正常に動作
-- ✅ UTF-8MB4文字エンコーディングが正しく適用
-- ✅ 日本語データの保存・取得が正常に動作
-- ✅ SQLiteデータベース操作が安定
-- ⚠️ 設定ファイルの変更は不要
+#### 注意 / Note
+- v2.0.1の修正は不完全で、MySQL Connector/J 8.xの非推奨パラメータを使用していたため、エラーが継続
+- v2.0.2で完全に修正されました
 
 ---
 

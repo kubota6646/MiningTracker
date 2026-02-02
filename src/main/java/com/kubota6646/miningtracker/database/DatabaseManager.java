@@ -68,9 +68,10 @@ public class DatabaseManager {
         int minIdle = plugin.getConfig().getInt("database.mysql.pool.minimum-idle", 2);
         long connectionTimeout = plugin.getConfig().getLong("database.mysql.pool.connection-timeout", 30000);
         
-        // JDBC URLパラメータを構築（接続設定はURLに含める）
+        // JDBC URLパラメータを構築（MySQL Connector/J 8.x用）
+        // 注: MySQL Connector/J 8.xではUTF-8がデフォルトなので、characterEncodingは不要
         String jdbcUrl = String.format(
-            "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8mb4",
+            "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&connectionCollation=utf8mb4_unicode_ci",
             host, port, database
         );
         
