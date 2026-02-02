@@ -1,5 +1,39 @@
 # 変更履歴 / Changelog
 
+## [2.1.6] - 2026-02-02
+
+### 🌐 国際化 / Localization
+
+#### PlanページのUI完全日本語化
+- **変更内容**: PlanのMiningTrackerページのすべての英語テキストを日本語に翻訳
+- **対象箇所**:
+  - タブ名: `"Mining Stats"` → `"採掘統計"`, `"Server Stats"` → `"サーバー統計"`, `"Network Stats"` → `"ネットワーク統計"`
+  - NumberProviderのtext（7項目）:
+    - `"Total Blocks Mined"` → `"総採掘ブロック数"`
+    - `"Total Blocks Mined (This Server)"` → `"総採掘ブロック数（このサーバー）"`
+    - `"Mining Rank"` → `"採掘ランキング順位"`
+    - `"Server Total Blocks Mined"` → `"サーバー総採掘数"`
+    - `"Active Miners"` → `"アクティブマイナー数"`
+    - `"Network Total Blocks Mined"` → `"ネットワーク総採掘数"`
+    - `"Total Active Miners"` → `"総アクティブマイナー数"`
+  - TableProviderの列名（9項目）:
+    - `"Block Type"` → `"ブロック種類"`
+    - `"Count (This Server)"` → `"採掘数（このサーバー）"`
+    - `"Count (All Servers)"` → `"採掘数（全サーバー）"`
+    - `"Player"` → `"プレイヤー"`
+    - `"Blocks Mined"` / `"Total Blocks"` → `"採掘数"` / `"総採掘数"`
+    - `"Rank"` → `"順位"`
+    - `"Server"` → `"サーバー"`
+    - `"Players"` → `"プレイヤー数"`
+- **影響**: 日本語ユーザーにとってより理解しやすいインターフェースに改善
+
+### 📚 技術詳細
+- Plan DataExtensionのすべてのアノテーション内テキストを日本語化
+- description（説明文）は元々日本語だったため変更なし
+- UI表示に影響するtext、tab、column名のみを変更
+
+---
+
 ## [2.1.5] - 2026-02-02
 
 ### 🔧 修正 / Critical Fix

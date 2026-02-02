@@ -25,7 +25,7 @@ import java.util.UUID;
     color = Color.BROWN
 )
 @TabInfo(
-    tab = "Mining Stats",
+    tab = "採掘統計",
     iconName = "chart-bar",
     elementOrder = {ElementOrder.VALUES, ElementOrder.TABLE, ElementOrder.GRAPH}
 )
@@ -62,7 +62,7 @@ public class MiningTrackerExtension implements DataExtension {
     // プレイヤー別データ
     
     @NumberProvider(
-        text = "Total Blocks Mined",
+        text = "総採掘ブロック数",
         description = "このプレイヤーの総採掘ブロック数（全サーバー合計）",
         priority = 100,
         iconName = "cubes",
@@ -74,7 +74,7 @@ public class MiningTrackerExtension implements DataExtension {
     }
     
     @NumberProvider(
-        text = "Total Blocks Mined (This Server)",
+        text = "総採掘ブロック数（このサーバー）",
         description = "このサーバーでの総採掘ブロック数",
         priority = 90,
         iconName = "cube",
@@ -86,7 +86,7 @@ public class MiningTrackerExtension implements DataExtension {
     }
     
     @NumberProvider(
-        text = "Mining Rank",
+        text = "採掘ランキング順位",
         description = "採掘ランキング順位（全サーバー合計）",
         priority = 80,
         iconName = "trophy",
@@ -97,12 +97,12 @@ public class MiningTrackerExtension implements DataExtension {
     }
     
     @TableProvider(tableColor = Color.BROWN)
-    @Tab("Mining Stats")
+    @Tab("採掘統計")
     public Table blockTypeBreakdown(UUID playerUUID) {
         Table.Factory table = Table.builder()
-            .columnOne("Block Type", Icon.called("cube").build())
-            .columnTwo("Count (This Server)", Icon.called("hashtag").build())
-            .columnThree("Count (All Servers)", Icon.called("cubes").build());
+            .columnOne("ブロック種類", Icon.called("cube").build())
+            .columnTwo("採掘数（このサーバー）", Icon.called("hashtag").build())
+            .columnThree("採掘数（全サーバー）", Icon.called("cubes").build());
         
         String serverName = plugin.getConfig().getString("server-name", "default");
         Map<String, Long> thisServerStats = database.getPlayerStatsByServer(playerUUID, serverName);
@@ -120,39 +120,39 @@ public class MiningTrackerExtension implements DataExtension {
     // サーバー別データ
     
     @NumberProvider(
-        text = "Server Total Blocks Mined",
+        text = "サーバー総採掘数",
         description = "このサーバーでの総採掘ブロック数（全プレイヤー合計）",
         priority = 100,
         iconName = "server",
         iconColor = Color.BROWN,
         showInPlayerTable = false
     )
-    @Tab("Server Stats")
+    @Tab("サーバー統計")
     public long serverTotalBlocksMined() {
         String serverName = plugin.getConfig().getString("server-name", "default");
         return database.getServerTotalMined(serverName);
     }
     
     @NumberProvider(
-        text = "Active Miners",
+        text = "アクティブマイナー数",
         description = "このサーバーで採掘したプレイヤー数",
         priority = 90,
         iconName = "users",
         iconColor = Color.LIGHT_BLUE
     )
-    @Tab("Server Stats")
+    @Tab("サーバー統計")
     public long serverActiveMiners() {
         String serverName = plugin.getConfig().getString("server-name", "default");
         return database.getServerPlayerCount(serverName);
     }
     
     @TableProvider(tableColor = Color.BROWN)
-    @Tab("Server Stats")
+    @Tab("サーバー統計")
     public Table serverTopMiners() {
         Table.Factory table = Table.builder()
-            .columnOne("Player", Icon.called("user").build())
-            .columnTwo("Blocks Mined", Icon.called("cubes").build())
-            .columnThree("Rank", Icon.called("trophy").build());
+            .columnOne("プレイヤー", Icon.called("user").build())
+            .columnTwo("採掘数", Icon.called("cubes").build())
+            .columnThree("順位", Icon.called("trophy").build());
         
         String serverName = plugin.getConfig().getString("server-name", "default");
         var topPlayers = database.getTopPlayersByServer(serverName, 10);
@@ -172,37 +172,37 @@ public class MiningTrackerExtension implements DataExtension {
     // ネットワーク全体データ
     
     @NumberProvider(
-        text = "Network Total Blocks Mined",
+        text = "ネットワーク総採掘数",
         description = "全サーバー合計の総採掘ブロック数",
         priority = 100,
         iconName = "globe",
         iconColor = Color.GREEN,
         showInPlayerTable = false
     )
-    @Tab("Network Stats")
+    @Tab("ネットワーク統計")
     public long networkTotalBlocksMined() {
         return database.getNetworkTotalMined();
     }
     
     @NumberProvider(
-        text = "Total Active Miners",
+        text = "総アクティブマイナー数",
         description = "全サーバーで採掘したプレイヤーの総数",
         priority = 90,
         iconName = "users",
         iconColor = Color.LIGHT_GREEN
     )
-    @Tab("Network Stats")
+    @Tab("ネットワーク統計")
     public long networkActiveMiners() {
         return database.getNetworkPlayerCount();
     }
     
     @TableProvider(tableColor = Color.GREEN)
-    @Tab("Network Stats")
+    @Tab("ネットワーク統計")
     public Table networkTopMiners() {
         Table.Factory table = Table.builder()
-            .columnOne("Player", Icon.called("user").build())
-            .columnTwo("Total Blocks", Icon.called("cubes").build())
-            .columnThree("Rank", Icon.called("trophy").build());
+            .columnOne("プレイヤー", Icon.called("user").build())
+            .columnTwo("総採掘数", Icon.called("cubes").build())
+            .columnThree("順位", Icon.called("trophy").build());
         
         var topPlayers = database.getTopPlayersAllServers(10);
         
@@ -219,12 +219,12 @@ public class MiningTrackerExtension implements DataExtension {
     }
     
     @TableProvider(tableColor = Color.BLUE)
-    @Tab("Network Stats")
+    @Tab("ネットワーク統計")
     public Table serverComparison() {
         Table.Factory table = Table.builder()
-            .columnOne("Server", Icon.called("server").build())
-            .columnTwo("Total Blocks", Icon.called("cubes").build())
-            .columnThree("Players", Icon.called("users").build());
+            .columnOne("サーバー", Icon.called("server").build())
+            .columnTwo("総採掘数", Icon.called("cubes").build())
+            .columnThree("プレイヤー数", Icon.called("users").build());
         
         var serverStats = database.getAllServerStats();
         
