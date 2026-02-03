@@ -96,7 +96,7 @@ public class MiningTrackerExtension implements DataExtension {
         return database.getPlayerRank(playerUUID);
     }
     
-    @TableProvider(tableColor = Color.BROWN)
+    @TableProvider(text = "ブロック種類別内訳", tableColor = Color.BROWN)
     @Tab("採掘統計")
     public Table blockTypeBreakdown(UUID playerUUID) {
         Table.Factory table = Table.builder()
@@ -146,7 +146,7 @@ public class MiningTrackerExtension implements DataExtension {
         return database.getServerPlayerCount(serverName);
     }
     
-    @TableProvider(tableColor = Color.BROWN)
+    @TableProvider(text = "トップマイナー", tableColor = Color.BROWN)
     @Tab("サーバー統計")
     public Table serverTopMiners() {
         Table.Factory table = Table.builder()
@@ -196,7 +196,7 @@ public class MiningTrackerExtension implements DataExtension {
         return database.getNetworkPlayerCount();
     }
     
-    @TableProvider(tableColor = Color.GREEN)
+    @TableProvider(text = "ネットワークトップマイナー", tableColor = Color.GREEN)
     @Tab("ネットワーク統計")
     public Table networkTopMiners() {
         Table.Factory table = Table.builder()
@@ -218,7 +218,7 @@ public class MiningTrackerExtension implements DataExtension {
         return table.build();
     }
     
-    @TableProvider(tableColor = Color.BLUE)
+    @TableProvider(text = "サーバー比較", tableColor = Color.BLUE)
     @Tab("ネットワーク統計")
     public Table serverComparison() {
         Table.Factory table = Table.builder()
