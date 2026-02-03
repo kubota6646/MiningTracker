@@ -4,20 +4,20 @@
 
 ### 🌐 国際化 / Localization
 
-#### テーブルメソッド名の日本語化（romaji）
+#### テーブルメソッド名の日本語化（Romaji）
 - **問題**: Planの言語設定を日本語（ja）に変更しても、テーブル名が英語のまま表示される
 - **原因**: `@TableProvider`アノテーションは`text`パラメータをサポートしておらず、メソッド名がそのまま表示される
-- **修正内容**: テーブルプロバイダーメソッド名を日本語romaji（ローマ字）に変更
+- **修正内容**: テーブルプロバイダーメソッド名を日本語Romaji（ローマ字）に変更
   - `blockTypeBreakdown` → `burokku_shubetsu_naiwake`（ブロック種類別内訳）
   - `serverTopMiners` → `toppu_maina`（トップマイナー）
   - `networkTopMiners` → `nettowaku_toppu_maina`（ネットワークトップマイナー）
   - `serverComparison` → `saba_hikaku`（サーバー比較）
-- **影響**: Planのテーブル表示名が日本語romajiになり、英語と日本語の混在が軽減
+- **影響**: Planのテーブル表示名が日本語Romajiになり、英語と日本語の混在が軽減
 
 ### 📚 技術詳細
 - `@NumberProvider`は`text`パラメータをサポートしているが、`@TableProvider`はサポートしていない
 - Plan 5.6の`@TableProvider`はメソッド名を表示名として使用する
-- メソッド名を日本語romajiに変更することで、より日本語に近い表示を実現
+- メソッド名を日本語Romajiに変更することで、より日本語に近い表示を実現
 - データベース互換性を保つため、メソッド名の変更は慎重に実施
 
 ### ⚠️ 重要な注意事項

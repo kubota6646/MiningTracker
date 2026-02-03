@@ -125,7 +125,7 @@ server-name: "creative"
 
 ### 注意: Planの日本語化
 
-**MiningTracker v2.1.8以降**: テーブル名は日本語romaji（ローマ字）になっています。
+**MiningTracker v2.1.8以降**: テーブル名は日本語Romaji（ローマ字）になっています。
 - 例: `burokku_shubetsu_naiwake`（ブロック種類別内訳）、`toppu_maina`（トップマイナー）
 - これは`@TableProvider`が`text`パラメータをサポートしていないための対応です
 

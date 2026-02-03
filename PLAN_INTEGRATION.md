@@ -248,7 +248,7 @@ Plan Player Analyticsのダッシュボードでは：
 Planは統計をプレイヤー一覧テーブルに表示する際、自動的に「Average」（平均）などのラベルを追加します。
 このラベルがPlanの言語設定に基づいて表示されるため、英語設定の場合は「Average 総採掘ブロック数」のように英語と日本語が混在します。
 
-**注意**: MiningTracker v2.1.8以降、テーブル名は日本語romaji（ローマ字）になっています。
+**注意**: MiningTracker v2.1.8以降、テーブル名は日本語Romaji（ローマ字）になっています。
 - 例: `burokku_shubetsu_naiwake`（ブロック種類別内訳）、`toppu_maina`（トップマイナー）
 - これは`@TableProvider`が`text`パラメータをサポートしていないための対応です
 
