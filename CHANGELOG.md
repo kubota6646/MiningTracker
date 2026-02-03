@@ -1,5 +1,112 @@
 # 変更履歴 / Changelog
 
+## [2.2.0] - 2026-02-03
+
+### 🐛 重大なバグ修正 / Critical Bug Fix
+
+#### DatabaseManagerのリソースリーク修正
+- **問題**: ResultSetオブジェクトが適切に閉じられておらず、リソースリークが発生
+- **原因**: 30箇所のResultSet宣言がtry-with-resourcesで管理されていなかった
+- **修正内容**: すべてのResultSetをtry-with-resources文で適切に管理するように修正
+- **影響**: 
+  - メモリリークの防止
+  - データベースコネクションプール枯渇の防止
+  - 長時間稼働時の安定性向上
+  - パフォーマンス向上
+
+### 🔧 メンテナンス / Maintenance
+
+#### バージョン番号の一貫性確保
+- build.gradleのバージョンを2.2.0に更新
+- VERSION.mdを最新の変更履歴で更新
+- すべてのバージョン情報を統一
+
+### 📊 修正詳細
+- **修正ファイル**: `DatabaseManager.java`
+- **修正箇所**: 30箇所のResultSet宣言
+- **変更行数**: 156行追加、132行削除
+- **影響範囲**: すべてのデータベースクエリメソッド
+
+### ⚠️ 重要性
+このリリースは**重要なバグ修正**を含んでいるため、すべてのユーザーにアップグレードを強く推奨します。
+
+---
+
+## [2.1.9] - 2026-02-03
+
+### 🐛 バグ修正 / Bug Fix
+
+#### 重複テーブル表示の修正
+- **問題**: Planでテーブルが2つずつ表示される（重複表示）
+- **原因**: メソッド名変更時に`@InvalidateMethod`アノテーションを使用していなかったため、Planが古いメソッド名と新しいメソッド名を別々のプロバイダーとして認識
+- **修正内容**: `@InvalidateMethod`アノテーションを追加して、古いメソッド名から新しいメソッド名への移行を明示
+  - `@InvalidateMethod("blockTypeBreakdown")` → `burokku_shubetsu_naiwake`に移行
+  - `@InvalidateMethod("serverTopMiners")` → `toppu_maina`に移行
+  - `@InvalidateMethod("networkTopMiners")` → `nettowaku_toppu_maina`に移行
+  - `@InvalidateMethod("serverComparison")` → `saba_hikaku`に移行
+- **影響**: Planでテーブルが重複せず、正しく1つずつ表示されるようになる
+
+### 📚 技術詳細
+- Planはメソッド名をデータベース識別子として使用する
+- メソッド名を変更する場合、`@InvalidateMethod`で古い名前を指定する必要がある
+- これにより、Planは古いデータを新しいメソッド名に関連付ける
+- 重複表示や古いデータの残存を防ぐ
+
+---
+
+## [2.1.8] - 2026-02-03
+
+### 🌐 国際化 / Localization
+
+#### テーブルメソッド名の日本語化（Romaji）
+- **問題**: Planの言語設定を日本語（ja）に変更しても、テーブル名が英語のまま表示される
+- **原因**: `@TableProvider`アノテーションは`text`パラメータをサポートしておらず、メソッド名がそのまま表示される
+- **修正内容**: テーブルプロバイダーメソッド名を日本語Romaji（ローマ字）に変更
+  - `blockTypeBreakdown` → `burokku_shubetsu_naiwake`（ブロック種類別内訳）
+  - `serverTopMiners` → `toppu_maina`（トップマイナー）
+  - `networkTopMiners` → `nettowaku_toppu_maina`（ネットワークトップマイナー）
+  - `serverComparison` → `saba_hikaku`（サーバー比較）
+- **影響**: Planのテーブル表示名が日本語Romajiになり、英語と日本語の混在が軽減
+
+### 📚 技術詳細
+- `@NumberProvider`は`text`パラメータをサポートしているが、`@TableProvider`はサポートしていない
+- Plan 5.6の`@TableProvider`はメソッド名を表示名として使用する
+- メソッド名を日本語Romajiに変更することで、より日本語に近い表示を実現
+- データベース互換性を保つため、メソッド名の変更は慎重に実施
+
+### ⚠️ 重要な注意事項
+- このバージョンでテーブルプロバイダーのメソッド名が変更されました
+- Planのデータベースでは新しいメソッド名として認識されます
+- 既存のPlan統計データは保持されますが、新しい名前でデータが記録されます
+
+---
+
+## [2.1.7] - 2026-02-03
+
+### 📚 ドキュメント改善 / Documentation Improvements
+
+#### Planの英語/日本語混在問題の解決ガイドを追加
+- **問題**: Planの統計表示で「Average 総採掘ブロック数」のように英語と日本語が混在する
+- **原因**: Plan自体の言語設定が英語（デフォルト）になっているため、Planが自動追加するラベル（Average、Total等）が英語で表示される
+- **解決策**: Planの設定ファイルで言語を日本語（ja）に変更する
+- **追加ドキュメント**:
+  - `PLAN_INTEGRATION.md`に「Planの表示が一部英語になる」セクションを追加
+  - `PLAN_TROUBLESHOOTING.md`に「問題4: Planの表示が一部英語になる」を追加
+  - `README.md`に注意事項として追加
+- **内容**: 
+  - config.ymlでの設定方法（推奨）
+  - Webインターフェースからの変更方法
+  - 変更前後の表示例
+  - クロスリファレンス追加
+- **影響**: ユーザーが簡単に日本語表示に変更できるようになる
+
+### 📚 技術詳細
+- MiningTrackerのコード変更は不要（Plan側の設定で解決）
+- `showInPlayerTable = true`の機能は維持
+- Plan 5.6以降の日本語ロケールを活用
+
+---
+
 ## [2.1.6] - 2026-02-02
 
 ### 🌐 国際化 / Localization

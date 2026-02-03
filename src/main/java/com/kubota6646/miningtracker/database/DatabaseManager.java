@@ -397,16 +397,16 @@ public class DatabaseManager {
             try (Connection conn = getMySQLConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, playerUUID.toString());
-                ResultSet rs = pstmt.executeQuery();
-                
-                while (rs.next()) {
-                    String blockType = rs.getString("block_type");
-                    int count = rs.getInt("count");
-                    try {
-                        Material material = Material.valueOf(blockType);
-                        stats.put(material, count);
-                    } catch (IllegalArgumentException e) {
-                        // 無効なマテリアルは無視
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        String blockType = rs.getString("block_type");
+                        int count = rs.getInt("count");
+                        try {
+                            Material material = Material.valueOf(blockType);
+                            stats.put(material, count);
+                        } catch (IllegalArgumentException e) {
+                            // 無効なマテリアルは無視
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -417,16 +417,16 @@ public class DatabaseManager {
                 Connection conn = getSQLiteConnection();
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setString(1, playerUUID.toString());
-                    ResultSet rs = pstmt.executeQuery();
-                    
-                    while (rs.next()) {
-                        String blockType = rs.getString("block_type");
-                        int count = rs.getInt("count");
-                        try {
-                            Material material = Material.valueOf(blockType);
-                            stats.put(material, count);
-                        } catch (IllegalArgumentException e) {
-                            // 無効なマテリアルは無視
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        while (rs.next()) {
+                            String blockType = rs.getString("block_type");
+                            int count = rs.getInt("count");
+                            try {
+                                Material material = Material.valueOf(blockType);
+                                stats.put(material, count);
+                            } catch (IllegalArgumentException e) {
+                                // 無効なマテリアルは無視
+                            }
                         }
                     }
                 }
@@ -446,10 +446,10 @@ public class DatabaseManager {
             try (Connection conn = getMySQLConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, playerUUID.toString());
-                ResultSet rs = pstmt.executeQuery();
-                
-                if (rs.next()) {
-                    return rs.getInt("total");
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("total");
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("総採掘数取得エラー: " + e.getMessage());
@@ -459,10 +459,10 @@ public class DatabaseManager {
                 Connection conn = getSQLiteConnection();
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setString(1, playerUUID.toString());
-                    ResultSet rs = pstmt.executeQuery();
-                    
-                    if (rs.next()) {
-                        return rs.getInt("total");
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getInt("total");
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -487,12 +487,12 @@ public class DatabaseManager {
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, limit);
                 pstmt.setInt(2, offset);
-                ResultSet rs = pstmt.executeQuery();
-                
-                while (rs.next()) {
-                    String playerName = rs.getString("player_name");
-                    int total = rs.getInt("total");
-                    rankings.add(new PlayerRanking(playerName, total));
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        String playerName = rs.getString("player_name");
+                        int total = rs.getInt("total");
+                        rankings.add(new PlayerRanking(playerName, total));
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("ランキング取得エラー: " + e.getMessage());
@@ -503,12 +503,12 @@ public class DatabaseManager {
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setInt(1, limit);
                     pstmt.setInt(2, offset);
-                    ResultSet rs = pstmt.executeQuery();
-                    
-                    while (rs.next()) {
-                        String playerName = rs.getString("player_name");
-                        int total = rs.getInt("total");
-                        rankings.add(new PlayerRanking(playerName, total));
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        while (rs.next()) {
+                            String playerName = rs.getString("player_name");
+                            int total = rs.getInt("total");
+                            rankings.add(new PlayerRanking(playerName, total));
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -532,9 +532,10 @@ public class DatabaseManager {
             try (Connection conn = getMySQLConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, playerUUID.toString());
-                ResultSet rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    return rs.getLong("total");
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getLong("total");
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
@@ -544,9 +545,10 @@ public class DatabaseManager {
                 Connection conn = getSQLiteConnection();
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setString(1, playerUUID.toString());
-                    ResultSet rs = pstmt.executeQuery();
-                    if (rs.next()) {
-                        return rs.getLong("total");
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getLong("total");
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -568,9 +570,10 @@ public class DatabaseManager {
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, playerUUID.toString());
                 pstmt.setString(2, serverName);
-                ResultSet rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    return rs.getLong("total");
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getLong("total");
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
@@ -581,9 +584,10 @@ public class DatabaseManager {
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setString(1, playerUUID.toString());
                     pstmt.setString(2, serverName);
-                    ResultSet rs = pstmt.executeQuery();
-                    if (rs.next()) {
-                        return rs.getLong("total");
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getLong("total");
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -610,9 +614,10 @@ public class DatabaseManager {
                 String uuid = playerUUID.toString();
                 pstmt.setString(1, uuid);
                 pstmt.setString(2, uuid);
-                ResultSet rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    return rs.getLong("rank");
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getLong("rank");
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("ランク取得エラー: " + e.getMessage());
@@ -624,9 +629,10 @@ public class DatabaseManager {
                     String uuid = playerUUID.toString();
                     pstmt.setString(1, uuid);
                     pstmt.setString(2, uuid);
-                    ResultSet rs = pstmt.executeQuery();
-                    if (rs.next()) {
-                        return rs.getLong("rank");
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getLong("rank");
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -649,9 +655,10 @@ public class DatabaseManager {
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, playerUUID.toString());
                 pstmt.setString(2, serverName);
-                ResultSet rs = pstmt.executeQuery();
-                while (rs.next()) {
-                    stats.put(rs.getString("block_type"), rs.getLong("count"));
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        stats.put(rs.getString("block_type"), rs.getLong("count"));
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
@@ -662,9 +669,10 @@ public class DatabaseManager {
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setString(1, playerUUID.toString());
                     pstmt.setString(2, serverName);
-                    ResultSet rs = pstmt.executeQuery();
-                    while (rs.next()) {
-                        stats.put(rs.getString("block_type"), rs.getLong("count"));
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        while (rs.next()) {
+                            stats.put(rs.getString("block_type"), rs.getLong("count"));
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -686,9 +694,10 @@ public class DatabaseManager {
             try (Connection conn = getMySQLConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, playerUUID.toString());
-                ResultSet rs = pstmt.executeQuery();
-                while (rs.next()) {
-                    stats.put(rs.getString("block_type"), rs.getLong("total"));
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        stats.put(rs.getString("block_type"), rs.getLong("total"));
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
@@ -698,9 +707,10 @@ public class DatabaseManager {
                 Connection conn = getSQLiteConnection();
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setString(1, playerUUID.toString());
-                    ResultSet rs = pstmt.executeQuery();
-                    while (rs.next()) {
-                        stats.put(rs.getString("block_type"), rs.getLong("total"));
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        while (rs.next()) {
+                            stats.put(rs.getString("block_type"), rs.getLong("total"));
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -721,9 +731,10 @@ public class DatabaseManager {
             try (Connection conn = getMySQLConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, serverName);
-                ResultSet rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    return rs.getLong("total");
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getLong("total");
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
@@ -733,9 +744,10 @@ public class DatabaseManager {
                 Connection conn = getSQLiteConnection();
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setString(1, serverName);
-                    ResultSet rs = pstmt.executeQuery();
-                    if (rs.next()) {
-                        return rs.getLong("total");
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getLong("total");
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -756,9 +768,10 @@ public class DatabaseManager {
             try (Connection conn = getMySQLConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, serverName);
-                ResultSet rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    return rs.getLong("count");
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getLong("count");
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
@@ -768,9 +781,10 @@ public class DatabaseManager {
                 Connection conn = getSQLiteConnection();
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setString(1, serverName);
-                    ResultSet rs = pstmt.executeQuery();
-                    if (rs.next()) {
-                        return rs.getLong("count");
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getLong("count");
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -796,12 +810,13 @@ public class DatabaseManager {
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, serverName);
                 pstmt.setInt(2, limit);
-                ResultSet rs = pstmt.executeQuery();
-                while (rs.next()) {
-                    topPlayers.add(Map.entry(
-                        rs.getString("player_name"),
-                        rs.getLong("total")
-                    ));
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        topPlayers.add(Map.entry(
+                            rs.getString("player_name"),
+                            rs.getLong("total")
+                        ));
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("ランキング取得エラー: " + e.getMessage());
@@ -812,12 +827,13 @@ public class DatabaseManager {
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setString(1, serverName);
                     pstmt.setInt(2, limit);
-                    ResultSet rs = pstmt.executeQuery();
-                    while (rs.next()) {
-                        topPlayers.add(Map.entry(
-                            rs.getString("player_name"),
-                            rs.getLong("total")
-                        ));
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        while (rs.next()) {
+                            topPlayers.add(Map.entry(
+                                rs.getString("player_name"),
+                                rs.getLong("total")
+                            ));
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -837,9 +853,10 @@ public class DatabaseManager {
         if (dbType.equalsIgnoreCase("mysql")) {
             try (Connection conn = getMySQLConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                ResultSet rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    return rs.getLong("total");
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getLong("total");
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
@@ -848,9 +865,10 @@ public class DatabaseManager {
             try {
                 Connection conn = getSQLiteConnection();
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                    ResultSet rs = pstmt.executeQuery();
-                    if (rs.next()) {
-                        return rs.getLong("total");
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getLong("total");
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -870,9 +888,10 @@ public class DatabaseManager {
         if (dbType.equalsIgnoreCase("mysql")) {
             try (Connection conn = getMySQLConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                ResultSet rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    return rs.getLong("count");
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getLong("count");
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
@@ -881,9 +900,10 @@ public class DatabaseManager {
             try {
                 Connection conn = getSQLiteConnection();
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                    ResultSet rs = pstmt.executeQuery();
-                    if (rs.next()) {
-                        return rs.getLong("count");
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getLong("count");
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -908,12 +928,13 @@ public class DatabaseManager {
             try (Connection conn = getMySQLConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, limit);
-                ResultSet rs = pstmt.executeQuery();
-                while (rs.next()) {
-                    topPlayers.add(Map.entry(
-                        rs.getString("player_name"),
-                        rs.getLong("total")
-                    ));
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        topPlayers.add(Map.entry(
+                            rs.getString("player_name"),
+                            rs.getLong("total")
+                        ));
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("ランキング取得エラー: " + e.getMessage());
@@ -923,12 +944,13 @@ public class DatabaseManager {
                 Connection conn = getSQLiteConnection();
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setInt(1, limit);
-                    ResultSet rs = pstmt.executeQuery();
-                    while (rs.next()) {
-                        topPlayers.add(Map.entry(
-                            rs.getString("player_name"),
-                            rs.getLong("total")
-                        ));
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        while (rs.next()) {
+                            topPlayers.add(Map.entry(
+                                rs.getString("player_name"),
+                                rs.getLong("total")
+                            ));
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -953,13 +975,14 @@ public class DatabaseManager {
         if (dbType.equalsIgnoreCase("mysql")) {
             try (Connection conn = getMySQLConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                ResultSet rs = pstmt.executeQuery();
-                while (rs.next()) {
-                    String serverName = rs.getString("server_name");
-                    Map<String, Long> stats = new HashMap<>();
-                    stats.put("totalBlocks", rs.getLong("totalBlocks"));
-                    stats.put("playerCount", rs.getLong("playerCount"));
-                    serverStats.put(serverName, stats);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        String serverName = rs.getString("server_name");
+                        Map<String, Long> stats = new HashMap<>();
+                        stats.put("totalBlocks", rs.getLong("totalBlocks"));
+                        stats.put("playerCount", rs.getLong("playerCount"));
+                        serverStats.put(serverName, stats);
+                    }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("サーバー統計取得エラー: " + e.getMessage());
@@ -968,13 +991,14 @@ public class DatabaseManager {
             try {
                 Connection conn = getSQLiteConnection();
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                    ResultSet rs = pstmt.executeQuery();
-                    while (rs.next()) {
-                        String serverName = rs.getString("server_name");
-                        Map<String, Long> stats = new HashMap<>();
-                        stats.put("totalBlocks", rs.getLong("totalBlocks"));
-                        stats.put("playerCount", rs.getLong("playerCount"));
-                        serverStats.put(serverName, stats);
+                    try (ResultSet rs = pstmt.executeQuery()) {
+                        while (rs.next()) {
+                            String serverName = rs.getString("server_name");
+                            Map<String, Long> stats = new HashMap<>();
+                            stats.put("totalBlocks", rs.getLong("totalBlocks"));
+                            stats.put("playerCount", rs.getLong("playerCount"));
+                            serverStats.put(serverName, stats);
+                        }
                     }
                 }
             } catch (SQLException e) {

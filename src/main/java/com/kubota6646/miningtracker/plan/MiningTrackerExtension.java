@@ -24,6 +24,10 @@ import java.util.UUID;
     iconFamily = Family.SOLID,
     color = Color.BROWN
 )
+@InvalidateMethod("blockTypeBreakdown")
+@InvalidateMethod("serverTopMiners")
+@InvalidateMethod("networkTopMiners")
+@InvalidateMethod("serverComparison")
 @TabInfo(
     tab = "採掘統計",
     iconName = "chart-bar",
@@ -98,7 +102,7 @@ public class MiningTrackerExtension implements DataExtension {
     
     @TableProvider(tableColor = Color.BROWN)
     @Tab("採掘統計")
-    public Table blockTypeBreakdown(UUID playerUUID) {
+    public Table burokku_shubetsu_naiwake(UUID playerUUID) {
         Table.Factory table = Table.builder()
             .columnOne("ブロック種類", Icon.called("cube").build())
             .columnTwo("採掘数（このサーバー）", Icon.called("hashtag").build())
@@ -148,7 +152,7 @@ public class MiningTrackerExtension implements DataExtension {
     
     @TableProvider(tableColor = Color.BROWN)
     @Tab("サーバー統計")
-    public Table serverTopMiners() {
+    public Table toppu_maina() {
         Table.Factory table = Table.builder()
             .columnOne("プレイヤー", Icon.called("user").build())
             .columnTwo("採掘数", Icon.called("cubes").build())
@@ -198,7 +202,7 @@ public class MiningTrackerExtension implements DataExtension {
     
     @TableProvider(tableColor = Color.GREEN)
     @Tab("ネットワーク統計")
-    public Table networkTopMiners() {
+    public Table nettowaku_toppu_maina() {
         Table.Factory table = Table.builder()
             .columnOne("プレイヤー", Icon.called("user").build())
             .columnTwo("総採掘数", Icon.called("cubes").build())
@@ -220,7 +224,7 @@ public class MiningTrackerExtension implements DataExtension {
     
     @TableProvider(tableColor = Color.BLUE)
     @Tab("ネットワーク統計")
-    public Table serverComparison() {
+    public Table saba_hikaku() {
         Table.Factory table = Table.builder()
             .columnOne("サーバー", Icon.called("server").build())
             .columnTwo("総採掘数", Icon.called("cubes").build())

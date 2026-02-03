@@ -123,6 +123,26 @@ server-name: "creative"
 
 **詳細**: [PLAN_INTEGRATION.md](PLAN_INTEGRATION.md)を参照してください。
 
+### 注意: Planの日本語化
+
+**MiningTracker v2.1.9以降**: テーブルの重複表示が修正されています。
+- v2.1.8からv2.1.9へのアップデートで、`@InvalidateMethod`による古いメソッド名からの移行が追加されました
+- テーブルが2つずつ表示される問題が解決されています
+
+**MiningTracker v2.1.8以降**: テーブル名は日本語Romaji（ローマ字）になっています。
+- 例: `burokku_shubetsu_naiwake`（ブロック種類別内訳）、`toppu_maina`（トップマイナー）
+- これは`@TableProvider`が`text`パラメータをサポートしていないための対応です
+
+それでもPlanで「Average 総採掘ブロック数」のように英語と日本語が混在する場合は、Plan自体の言語設定を変更する必要があります。
+
+**解決方法**: `plugins/Plan/config.yml`で言語を日本語に設定してください：
+```yaml
+Plugin:
+  Locale: ja  # 日本語に設定
+```
+
+詳細は [PLAN_INTEGRATION.md#planの表示が一部英語になる](PLAN_INTEGRATION.md#planの表示が一部英語になるaverage-総採掘ブロック数など) を参照してください。
+
 ## 設定
 
 ### config.yml
