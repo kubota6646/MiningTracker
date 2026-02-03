@@ -241,6 +241,61 @@ Plan Player Analyticsのダッシュボードでは：
 2. MySQLの場合、接続情報が正しいか確認
 3. サーバーログでエラーメッセージを確認
 
+### Planの表示が一部英語になる（「Average 総採掘ブロック数」など）
+
+**原因: Planの言語設定が英語になっている**
+
+Planは統計をプレイヤー一覧テーブルに表示する際、自動的に「Average」（平均）などのラベルを追加します。
+このラベルがPlanの言語設定に基づいて表示されるため、英語設定の場合は「Average 総採掘ブロック数」のように英語と日本語が混在します。
+
+**解決方法：Planを日本語に設定する**
+
+#### 方法1: config.ymlで言語を変更（推奨）
+
+1. サーバーを停止
+2. `plugins/Plan/config.yml`を編集：
+```yaml
+Plugin:
+  # 言語設定を日本語に変更
+  Locale: ja
+  # 日本語ロケールファイルの自動生成を有効化
+  Logging:
+    Create_new_locale_file_on_next_enable: true
+```
+
+3. サーバーを起動（または`/plan reload`を実行）
+4. Planが`plugins/Plan/locale.yml`を生成
+
+これにより、「Average」は「平均」に、その他の英語ラベルも日本語に変換されます。
+
+#### 方法2: Webインターフェースから変更
+
+1. Plan管理画面を開く（例: `http://サーバーIP:8804`）
+2. 「Manage」→「Server Settings」
+3. 「General Settings」→「Locale」
+4. 言語を「日本語 (ja)」に変更
+5. 設定を保存
+
+#### 方法3: showInPlayerTableを無効にする（非推奨）
+
+完全に英語ラベルを回避したい場合、MiningTrackerの設定を変更することも可能です：
+- `MiningTrackerExtension.java`の`showInPlayerTable = true`を`false`に変更
+- ただし、この方法では統計がプレイヤー一覧テーブルに表示されなくなります
+
+**推奨**: 方法1または方法2でPlanを日本語に設定してください。
+
+#### 変更後の表示例
+
+**変更前（英語設定）:**
+- Average 総採掘ブロック数
+- Total 総採掘ブロック数
+- Max 総採掘ブロック数
+
+**変更後（日本語設定）:**
+- 平均 総採掘ブロック数
+- 合計 総採掘ブロック数
+- 最大 総採掘ブロック数
+
 ### マルチサーバーでデータが統合されない
 
 **原因: 異なるデータベースを使用している**
