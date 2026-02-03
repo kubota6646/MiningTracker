@@ -1,5 +1,27 @@
 # 変更履歴 / Changelog
 
+## [2.1.8] - 2026-02-03
+
+### 🌐 国際化 / Localization
+
+#### @TableProvider表示名の完全日本語化
+- **問題**: Planの言語設定を日本語（ja）に変更しても、テーブル名が英語のまま表示される
+- **原因**: `@TableProvider`アノテーションに`text`パラメータが設定されていなかったため、メソッド名（英語）がそのまま表示されていた
+- **修正内容**: すべての`@TableProvider`アノテーションに日本語の`text`パラメータを追加
+  - `blockTypeBreakdown` → `text = "ブロック種類別内訳"`
+  - `serverTopMiners` → `text = "トップマイナー"`
+  - `networkTopMiners` → `text = "ネットワークトップマイナー"`
+  - `serverComparison` → `text = "サーバー比較"`
+- **影響**: Planのテーブル表示が完全に日本語化され、英語と日本語の混在が解消
+
+### 📚 技術詳細
+- `@NumberProvider`は元々`text`パラメータで日本語化済み
+- `@TableProvider`も同様に`text`パラメータをサポート
+- メソッド名は英語のまま（コード可読性とデータベース互換性のため）
+- 表示名のみを日本語化
+
+---
+
 ## [2.1.7] - 2026-02-03
 
 ### 📚 ドキュメント改善 / Documentation Improvements

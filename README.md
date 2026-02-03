@@ -125,8 +125,9 @@ server-name: "creative"
 
 ### 注意: Planの日本語化
 
-PlanでMiningTrackerの統計を表示する際、「Average 総採掘ブロック数」のように英語と日本語が混在する場合があります。
-これはPlanの言語設定が英語になっているためです。
+**MiningTracker v2.1.8以降**: テーブル名は完全に日本語化されています。
+
+それでもPlanで「Average 総採掘ブロック数」のように英語と日本語が混在する場合は、Plan自体の言語設定を変更する必要があります。
 
 **解決方法**: `plugins/Plan/config.yml`で言語を日本語に設定してください：
 ```yaml
