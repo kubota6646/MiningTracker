@@ -125,7 +125,9 @@ server-name: "creative"
 
 ### 注意: Planの日本語化
 
-**MiningTracker v2.1.8以降**: テーブル名は完全に日本語化されています。
+**MiningTracker v2.1.8以降**: テーブル名は日本語romaji（ローマ字）になっています。
+- 例: `burokku_shubetsu_naiwake`（ブロック種類別内訳）、`toppu_maina`（トップマイナー）
+- これは`@TableProvider`が`text`パラメータをサポートしていないための対応です
 
 それでもPlanで「Average 総採掘ブロック数」のように英語と日本語が混在する場合は、Plan自体の言語設定を変更する必要があります。
 

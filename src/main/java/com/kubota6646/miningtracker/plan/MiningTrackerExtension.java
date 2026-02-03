@@ -96,9 +96,9 @@ public class MiningTrackerExtension implements DataExtension {
         return database.getPlayerRank(playerUUID);
     }
     
-    @TableProvider(text = "ブロック種類別内訳", tableColor = Color.BROWN)
+    @TableProvider(tableColor = Color.BROWN)
     @Tab("採掘統計")
-    public Table blockTypeBreakdown(UUID playerUUID) {
+    public Table burokku_shubetsu_naiwake(UUID playerUUID) {
         Table.Factory table = Table.builder()
             .columnOne("ブロック種類", Icon.called("cube").build())
             .columnTwo("採掘数（このサーバー）", Icon.called("hashtag").build())
@@ -146,9 +146,9 @@ public class MiningTrackerExtension implements DataExtension {
         return database.getServerPlayerCount(serverName);
     }
     
-    @TableProvider(text = "トップマイナー", tableColor = Color.BROWN)
+    @TableProvider(tableColor = Color.BROWN)
     @Tab("サーバー統計")
-    public Table serverTopMiners() {
+    public Table toppu_maina() {
         Table.Factory table = Table.builder()
             .columnOne("プレイヤー", Icon.called("user").build())
             .columnTwo("採掘数", Icon.called("cubes").build())
@@ -196,9 +196,9 @@ public class MiningTrackerExtension implements DataExtension {
         return database.getNetworkPlayerCount();
     }
     
-    @TableProvider(text = "ネットワークトップマイナー", tableColor = Color.GREEN)
+    @TableProvider(tableColor = Color.GREEN)
     @Tab("ネットワーク統計")
-    public Table networkTopMiners() {
+    public Table nettowaku_toppu_maina() {
         Table.Factory table = Table.builder()
             .columnOne("プレイヤー", Icon.called("user").build())
             .columnTwo("総採掘数", Icon.called("cubes").build())
@@ -218,9 +218,9 @@ public class MiningTrackerExtension implements DataExtension {
         return table.build();
     }
     
-    @TableProvider(text = "サーバー比較", tableColor = Color.BLUE)
+    @TableProvider(tableColor = Color.BLUE)
     @Tab("ネットワーク統計")
-    public Table serverComparison() {
+    public Table saba_hikaku() {
         Table.Factory table = Table.builder()
             .columnOne("サーバー", Icon.called("server").build())
             .columnTwo("総採掘数", Icon.called("cubes").build())

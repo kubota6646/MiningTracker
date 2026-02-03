@@ -278,7 +278,9 @@ server-name: "creative"
 - 統計ラベルが英語で表示される
 
 **注意**: MiningTracker v2.1.8以降を使用していますか？
-- v2.1.8以降では、テーブル名自体は完全に日本語化されています
+- v2.1.8以降では、テーブル名は日本語romaji（ローマ字）になっています
+- 例: `burokku_shubetsu_naiwake`、`toppu_maina`など
+- `@TableProvider`は`text`パラメータをサポートしていないため、メソッド名が表示されます
 - それでも英語が表示される場合は、Planの言語設定が原因です
 
 **原因**: 
