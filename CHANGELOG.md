@@ -1,5 +1,27 @@
 # 変更履歴 / Changelog
 
+## [2.1.9] - 2026-02-03
+
+### 🐛 バグ修正 / Bug Fix
+
+#### 重複テーブル表示の修正
+- **問題**: Planでテーブルが2つずつ表示される（重複表示）
+- **原因**: メソッド名変更時に`@InvalidateMethod`アノテーションを使用していなかったため、Planが古いメソッド名と新しいメソッド名を別々のプロバイダーとして認識
+- **修正内容**: `@InvalidateMethod`アノテーションを追加して、古いメソッド名から新しいメソッド名への移行を明示
+  - `@InvalidateMethod("blockTypeBreakdown")` → `burokku_shubetsu_naiwake`に移行
+  - `@InvalidateMethod("serverTopMiners")` → `toppu_maina`に移行
+  - `@InvalidateMethod("networkTopMiners")` → `nettowaku_toppu_maina`に移行
+  - `@InvalidateMethod("serverComparison")` → `saba_hikaku`に移行
+- **影響**: Planでテーブルが重複せず、正しく1つずつ表示されるようになる
+
+### 📚 技術詳細
+- Planはメソッド名をデータベース識別子として使用する
+- メソッド名を変更する場合、`@InvalidateMethod`で古い名前を指定する必要がある
+- これにより、Planは古いデータを新しいメソッド名に関連付ける
+- 重複表示や古いデータの残存を防ぐ
+
+---
+
 ## [2.1.8] - 2026-02-03
 
 ### 🌐 国際化 / Localization

@@ -125,6 +125,10 @@ server-name: "creative"
 
 ### 注意: Planの日本語化
 
+**MiningTracker v2.1.9以降**: テーブルの重複表示が修正されています。
+- v2.1.8からv2.1.9へのアップデートで、`@InvalidateMethod`による古いメソッド名からの移行が追加されました
+- テーブルが2つずつ表示される問題が解決されています
+
 **MiningTracker v2.1.8以降**: テーブル名は日本語Romaji（ローマ字）になっています。
 - 例: `burokku_shubetsu_naiwake`（ブロック種類別内訳）、`toppu_maina`（トップマイナー）
 - これは`@TableProvider`が`text`パラメータをサポートしていないための対応です

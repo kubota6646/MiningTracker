@@ -24,6 +24,10 @@ import java.util.UUID;
     iconFamily = Family.SOLID,
     color = Color.BROWN
 )
+@InvalidateMethod("blockTypeBreakdown")
+@InvalidateMethod("serverTopMiners")
+@InvalidateMethod("networkTopMiners")
+@InvalidateMethod("serverComparison")
 @TabInfo(
     tab = "採掘統計",
     iconName = "chart-bar",
