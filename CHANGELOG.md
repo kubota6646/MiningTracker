@@ -1,5 +1,44 @@
 # 変更履歴 / Changelog
 
+## [2.3.5] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fixes
+
+#### Plan統計表示のNULL処理修正
+- **バグ修正**: Planのサーバー総採掘数とネットワーク総採掘数が正常に表示されない
+- **問題**: 
+  - Planでサーバー総採掘数が表示されない
+  - Planでネットワーク総採掘数が表示されない
+  - データが存在する場合でも0や不正な値が表示される
+- **根本原因**:
+  - SQLの`SUM(count)`は結果が空の場合に`NULL`を返す
+  - JDBCの`rs.getLong()`は`NULL`を0として扱うが、`rs.wasNull()`でチェックしないと不正確
+  - NULL処理が不適切だった
+- **解決**:
+  ```java
+  long total = rs.getLong("total");
+  // rs.wasNull()をチェックしてNULLの場合は0を返す
+  return rs.wasNull() ? 0 : total;
+  ```
+- **影響**: 
+  - Planでサーバー総採掘数が正しく表示される
+  - Planでネットワーク総採掘数が正しく表示される
+  - データがない場合も0が正しく表示される
+
+### 🔧 技術詳細 / Technical Details
+
+#### 修正箇所
+1. **DatabaseManager.java (Bukkit)**
+   - `getServerTotalMined()`: NULL処理追加
+   - `getNetworkTotalMined()`: NULL処理追加
+   - エラーログ改善、スタックトレース追加
+
+2. **CommonDatabaseManager.java (Common)**
+   - `getNetworkTotalMined()`: NULL処理追加
+   - エラーログ改善、スタックトレース追加
+
+---
+
 ## [2.3.4] - 2026-02-07
 
 ### 🐛 バグ修正 / Bug Fixes
