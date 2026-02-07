@@ -2,9 +2,27 @@
 
 ## 現在のバージョン
 
-**v2.3.9** (2026-02-07)
+**v2.4.0** (2026-02-07)
 
 ## バージョン履歴
+
+### v2.4.0 - SLF4J完全修正（slf4j-jdk14への切り替え） (2026-02-07)
+- **SLF4Jエラー根本解決**: v2.3.8, v2.3.9での修正後も継続していたエラーを根本的に解決
+- **問題**: slf4j-simpleを使用していたが、Bukkitのロギングシステムと競合
+- **根本原因**:
+  - `slf4j-simple`: スタンドアロンアプリケーション向けのSLF4J実装
+  - BukkitはJava Util Logging（JUL）を使用
+  - slf4j-simpleとJULが競合し、SLF4Jプロバイダーが正しく検出されない
+- **解決**:
+  - `slf4j-simple` → `slf4j-jdk14`への切り替え（全モジュール）
+  - slf4j-jdk14はSLF4JをJava Util Logging（JUL）にブリッジ
+  - Bukkitのロギングシステムとネイティブ統合
+  - SLF4Jのリロケーションを削除し、`mergeServiceFiles()`を追加
+- **技術的メリット**:
+  - HikariCPのSLF4Jログ → JUL → Bukkitログに統合
+  - 追加設定不要
+  - Paper/Spigot/Bungeecord全環境で正常動作
+- **影響**: SLF4Jエラーが完全に解消され、HikariCPログがBukkitのログシステムに統合される
 
 ### v2.3.9 - SLF4J依存関係の明示化 (2026-02-07)
 - **SLF4Jエラー修正**: v2.3.8で修正を試みたが、エラーが継続していた問題を完全解決

@@ -6,7 +6,7 @@ dependencies {
     // Database dependencies (needed by DatabaseManager)
     implementation 'com.mysql:mysql-connector-j:8.3.0'
     implementation 'com.zaxxer:HikariCP:5.1.0'
-    implementation 'org.slf4j:slf4j-simple:2.0.9'
+    implementation 'org.slf4j:slf4j-jdk14:2.0.9'
 }
 
 shadowJar {
@@ -20,10 +20,13 @@ shadowJar {
     // Ensure resources are included
     from(sourceSets.main.output)
     
-    // Relocate dependencies to avoid conflicts
+    // Relocate dependencies to avoid conflicts (but NOT SLF4J - it needs to use JUL)
     relocate 'com.zaxxer.hikari', 'com.kubota6646.miningtracker.lib.hikari'
     relocate 'com.mysql', 'com.kubota6646.miningtracker.lib.mysql'
-    relocate 'org.slf4j', 'com.kubota6646.miningtracker.lib.slf4j'
+    // SLF4J is NOT relocated - slf4j-jdk14 needs to bridge to java.util.logging
+    
+    // Merge service files for SLF4J provider discovery
+    mergeServiceFiles()
 }
 
 processResources {

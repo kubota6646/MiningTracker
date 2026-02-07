@@ -1,5 +1,31 @@
 # 変更履歴 / Changelog
 
+## [2.4.0] - 2026-02-07
+
+### 🎉 メジャー修正 / Major Fix
+
+#### SLF4J完全修正 - slf4j-jdk14への切り替え
+- **SLF4Jエラー根本解決**: v2.3.8, v2.3.9での修正後も継続していたエラーを根本的に解決
+- **問題**:
+  ```
+  [ERROR]: [MiningTracker] [STDERR] SLF4J: No SLF4J providers were found.
+  [ERROR]: [MiningTracker] [STDERR] SLF4J: Defaulting to no-operation (NOP) logger implementation
+  ```
+- **根本原因**:
+  - `slf4j-simple`: スタンドアロンアプリケーション向けのSLF4J実装
+  - BukkitはJava Util Logging（JUL）を使用
+  - slf4j-simpleとJULが競合し、SLF4Jプロバイダーが正しく検出されない
+- **解決**:
+  - **slf4j-simple → slf4j-jdk14への切り替え** (全モジュール)
+  - slf4j-jdk14はSLF4JをJava Util Logging（JUL）にブリッジ
+  - Bukkitのロギングシステムとネイティブ統合
+  - SLF4Jのリロケーションを削除し、`mergeServiceFiles()`を追加
+- **技術的メリット**:
+  - HikariCPのSLF4Jログ → JUL → Bukkitログに完全統合
+  - Paper/Spigot/Bungeecordの既存のログ設定を使用
+  - 追加設定不要、競合なし
+- **影響**: SLF4Jエラーが完全に解消され、HikariCPログがBukkitのログシステムに統合される
+
 ## [2.3.9] - 2026-02-07
 
 ### 🐛 バグ修正 / Bug Fix

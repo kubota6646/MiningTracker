@@ -1,7 +1,7 @@
 dependencies {
     implementation 'com.mysql:mysql-connector-j:8.3.0'
     implementation 'com.zaxxer:HikariCP:5.1.0'
-    implementation 'org.slf4j:slf4j-simple:2.0.9'
+    implementation 'org.slf4j:slf4j-jdk14:2.0.9'
 }
 
 jar {
