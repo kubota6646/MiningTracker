@@ -1,1 +1,5 @@
 rootProject.name = 'MiningTracker'
+
+include 'miningtracker-common'
+include 'miningtracker-bukkit'
+include 'miningtracker-bungee'

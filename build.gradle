@@ -1,55 +1,40 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
 }
 
 group = 'com.kubota6646'
 version = '2.2.0'
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
-
-repositories {
-    mavenCentral()
-    maven {
-        name = 'papermc'
-        url = 'https://repo.papermc.io/repository/maven-public/'
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'com.github.johnrengelman.shadow'
+    
+    group = rootProject.group
+    version = rootProject.version
+    
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
-    maven {
-        name = 'jitpack'
-        url = 'https://jitpack.io'
+    
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'papermc'
+            url = 'https://repo.papermc.io/repository/maven-public/'
+        }
+        maven {
+            name = 'sonatype'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+        maven {
+            name = 'jitpack'
+            url = 'https://jitpack.io'
+        }
     }
-}
-
-dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
-    compileOnly 'com.github.plan-player-analytics:Plan:5.6.2959'
-    implementation 'com.mysql:mysql-connector-j:8.3.0'
-    implementation 'com.zaxxer:HikariCP:5.1.0'
-    implementation 'org.slf4j:slf4j-simple:2.0.9'
-}
-
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-}
-
-shadowJar {
-    archiveBaseName.set('MiningTracker')
-    archiveClassifier.set('')
-    archiveVersion.set(version)
-}
-
-processResources {
-    def props = [version: version]
-    inputs.properties props
-    filteringCharset 'UTF-8'
-    filesMatching('plugin.yml') {
-        expand props
+    
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
     }
-}
-
-build {
-    dependsOn shadowJar
 }

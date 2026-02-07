@@ -1,0 +1,6 @@
+name: MiningTracker
+version: '${version}'
+main: com.kubota6646.miningtracker.bungee.MiningTrackerBungee
+author: kubota6646
+description: MiningTracker Bungeecord Plugin - Plan Player Analytics Integration
+softDepends: [Plan]
