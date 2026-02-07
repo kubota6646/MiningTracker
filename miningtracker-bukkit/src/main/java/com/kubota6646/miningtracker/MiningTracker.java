@@ -7,6 +7,7 @@ import com.kubota6646.miningtracker.database.DatabaseManager;
 import com.kubota6646.miningtracker.listeners.BlockBreakListener;
 import com.kubota6646.miningtracker.managers.MessageManager;
 import com.kubota6646.miningtracker.managers.DataManager;
+import com.kubota6646.miningtracker.managers.MinecraftStatsImporter;
 import com.kubota6646.miningtracker.plan.MiningTrackerExtension;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -16,6 +17,7 @@ public class MiningTracker extends JavaPlugin {
     private DatabaseManager databaseManager;
     private MessageManager messageManager;
     private DataManager dataManager;
+    private MinecraftStatsImporter statsImporter;
     
     @Override
     public void onEnable() {
@@ -28,6 +30,7 @@ public class MiningTracker extends JavaPlugin {
         messageManager = new MessageManager(this);
         databaseManager = new DatabaseManager(this);
         dataManager = new DataManager(this);
+        statsImporter = new MinecraftStatsImporter(this);
         
         // データベース接続
         if (!databaseManager.connect()) {
@@ -96,5 +99,9 @@ public class MiningTracker extends JavaPlugin {
     
     public DataManager getDataManager() {
         return dataManager;
+    }
+    
+    public MinecraftStatsImporter getStatsImporter() {
+        return statsImporter;
     }
 }

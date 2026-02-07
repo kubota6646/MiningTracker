@@ -45,6 +45,11 @@ tracking:
   # シルクタッチで採掘したブロックをカウントするか
   count-silk-touch: true
 
+# Minecraft統計インポート設定
+import:
+  # 既存データがない場合にMinecraft統計からインポートするか
+  enabled: true
+
 # ランキング設定
 ranking:
   # 1ページあたりの表示件数

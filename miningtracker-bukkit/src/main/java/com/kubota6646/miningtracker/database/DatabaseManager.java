@@ -343,6 +343,17 @@ public class DatabaseManager {
     }
     
     public void addMiningCount(UUID playerUUID, String playerName, Material material) {
+        addMiningCount(playerUUID, playerName, material, 1);
+    }
+    
+    /**
+     * 指定した採掘数を追加（インポート用）
+     * @param playerUUID プレイヤーUUID
+     * @param playerName プレイヤー名
+     * @param material ブロックタイプ
+     * @param count 追加する採掘数
+     */
+    public void addMiningCount(UUID playerUUID, String playerName, Material material, int count) {
         String dbType = plugin.getConfig().getString("database.type", "sqlite");
         String serverName = plugin.getConfig().getString("server-name", "default");
         String sql;
@@ -350,14 +361,14 @@ public class DatabaseManager {
         if (dbType.equalsIgnoreCase("mysql")) {
             // MySQL用のUPSERT構文（server_name含む）
             sql = "INSERT INTO mining_data (player_uuid, player_name, block_type, server_name, count) " +
-                  "VALUES (?, ?, ?, ?, 1) " +
-                  "ON DUPLICATE KEY UPDATE count = count + 1, player_name = ?";
+                  "VALUES (?, ?, ?, ?, ?) " +
+                  "ON DUPLICATE KEY UPDATE count = count + ?, player_name = ?";
         } else {
             // SQLite用のUPSERT構文（server_name含む）
             sql = "INSERT INTO mining_data (player_uuid, player_name, block_type, server_name, count) " +
-                  "VALUES (?, ?, ?, ?, 1) " +
+                  "VALUES (?, ?, ?, ?, ?) " +
                   "ON CONFLICT(player_uuid, block_type, server_name) " +
-                  "DO UPDATE SET count = count + 1, player_name = ?";
+                  "DO UPDATE SET count = count + ?, player_name = ?";
         }
         
         if (dbType.equalsIgnoreCase("mysql")) {
@@ -373,7 +384,9 @@ public class DatabaseManager {
                 pstmt.setString(2, playerName);
                 pstmt.setString(3, material.name());
                 pstmt.setString(4, serverName);
-                pstmt.setString(5, playerName);
+                pstmt.setInt(5, count);
+                pstmt.setInt(6, count);
+                pstmt.setString(7, playerName);
                 pstmt.executeUpdate();
                 // autoCommit=trueなので、ここで自動的にコミットされている
             } catch (SQLException e) {
@@ -392,7 +405,9 @@ public class DatabaseManager {
                     pstmt.setString(2, playerName);
                     pstmt.setString(3, material.name());
                     pstmt.setString(4, serverName);
-                    pstmt.setString(5, playerName);
+                    pstmt.setInt(5, count);
+                    pstmt.setInt(6, count);
+                    pstmt.setString(7, playerName);
                     pstmt.executeUpdate();
                     // autoCommit=trueなので、ここで自動的にコミットされている
                 }
