@@ -5,6 +5,10 @@
 MiningTracker v2.1.0から、Plan Player Analyticsプラグインとの連携機能が追加されました。
 この機能により、プレイヤーの採掘統計をPlanのWebダッシュボードで視覚的に確認できます。
 
+**v2.2.0以降**: Bungeecordネットワーク環境での動作を正式サポート。ネットワークページに採掘統計が表示されます。
+
+> **Bungeecordネットワーク構成**: 詳細な設定方法は [BUNGEECORD_SETUP.md](BUNGEECORD_SETUP.md) を参照してください。
+
 ## 機能
 
 ### 表示されるデータ
