@@ -474,9 +474,9 @@ public class DatabaseManager {
                     pstmt.setInt(6, count);  // UPDATE時に既存countを上書きする値
                     pstmt.setString(7, playerName);
                     pstmt.executeUpdate();
-                } catch (SQLException e) {
-                    plugin.getLogger().warning("採掘データの設定エラー: " + e.getMessage());
                 }
+            } catch (SQLException e) {
+                plugin.getLogger().warning("採掘データの設定エラー: " + e.getMessage());
             }
         }
     }
