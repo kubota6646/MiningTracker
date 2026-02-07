@@ -91,6 +91,9 @@ public class CommonDatabaseManager {
         hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
         hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         
+        // リアルタイム同期を確実にするための設定
+        hikariConfig.setAutoCommit(true);  // 明示的にautoCommitを有効化
+        
         try {
             hikariDataSource = new HikariDataSource(hikariConfig);
             logger.info("MySQLデータベース（HikariCP）に接続しました。");

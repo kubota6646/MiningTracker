@@ -93,8 +93,11 @@ public class DatabaseManager {
         hikariConfig.addDataSourceProperty("rewriteBatchedStatements", "true");
         hikariConfig.addDataSourceProperty("cacheResultSetMetadata", "true");
         hikariConfig.addDataSourceProperty("cacheServerConfiguration", "true");
-        hikariConfig.addDataSourceProperty("elideSetAutoCommits", "true");
+        // elideSetAutoCommits を削除 - リアルタイム同期のため
         hikariConfig.addDataSourceProperty("maintainTimeStats", "false");
+        
+        // リアルタイム同期を確実にするための設定
+        hikariConfig.setAutoCommit(true);  // 明示的にautoCommitを有効化
         
         try {
             hikariDataSource = new HikariDataSource(hikariConfig);
@@ -359,14 +362,20 @@ public class DatabaseManager {
         
         if (dbType.equalsIgnoreCase("mysql")) {
             // MySQLの場合: 接続プールから取得、try-with-resourcesで返却
+            // autoCommitがtrueの場合、executeUpdate()後に自動的にコミットされる
             try (Connection conn = getMySQLConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                // autoCommitを明示的に有効化（リアルタイム同期のため）
+                if (!conn.getAutoCommit()) {
+                    conn.setAutoCommit(true);
+                }
                 pstmt.setString(1, playerUUID.toString());
                 pstmt.setString(2, playerName);
                 pstmt.setString(3, material.name());
                 pstmt.setString(4, serverName);
                 pstmt.setString(5, playerName);
                 pstmt.executeUpdate();
+                // autoCommit=trueなので、ここで自動的にコミットされている
             } catch (SQLException e) {
                 plugin.getLogger().warning("採掘データの保存エラー: " + e.getMessage());
             }
@@ -374,6 +383,10 @@ public class DatabaseManager {
             // SQLiteの場合: 永続的な接続を使用、閉じない
             try {
                 Connection conn = getSQLiteConnection();
+                // SQLiteもautoCommitを確実に有効化
+                if (!conn.getAutoCommit()) {
+                    conn.setAutoCommit(true);
+                }
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     pstmt.setString(1, playerUUID.toString());
                     pstmt.setString(2, playerName);
@@ -381,6 +394,7 @@ public class DatabaseManager {
                     pstmt.setString(4, serverName);
                     pstmt.setString(5, playerName);
                     pstmt.executeUpdate();
+                    // autoCommit=trueなので、ここで自動的にコミットされている
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("採掘データの保存エラー: " + e.getMessage());
