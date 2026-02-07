@@ -6,15 +6,21 @@
 
 ## バージョン履歴
 
-### v2.2.0 - Bungeecord対応とドキュメント改善 (2026-02-07)
-- **新機能**: Bungeecord/Velocityネットワーク環境での動作を正式サポート
-- **ドキュメント**: BUNGEECORD_SETUP.md - Bungeecord環境での詳細なセットアップガイドを追加
-- **ドキュメント**: PLAN_INTEGRATION.md - Bungeecord対応の記載を追加
-- **ドキュメント**: README.md - Bungeecord対応の情報を追加
-- **Plan連携**: ネットワークページに採掘統計が正しく表示されることを確認
-- **マルチサーバー**: 複数のバックエンドサーバーからのデータ集約をサポート
-- **サーバー比較**: ネットワークページでサーバー間の採掘量を比較可能
-- **重大なバグ修正**: DatabaseManagerのResultSetリソースリークを修正（v2.2.0初期リリースより）
+### v2.2.0 - Bungeecordプラグイン対応とマルチモジュール化 (2026-02-07)
+- **新機能**: Bungeecordプロキシに直接インストール可能なプラグインを追加 ⭐
+- **新機能**: MiningTracker-Bungee - ネットワーク統計のみをPlanに表示
+- **アーキテクチャ**: マルチモジュールGradleプロジェクトに変更
+  - `miningtracker-common`: 共通コード（DB、設定）
+  - `miningtracker-bukkit`: Bukkitプラグイン（既存機能維持）
+  - `miningtracker-bungee`: Bungeecordプラグイン（新規）
+- **新機能**: ConfigAdapterインターフェース - Bukkit/Bungeeの設定統一化
+- **新機能**: CommonDatabaseManager - プラットフォーム非依存のDB処理
+- **Plan連携**: Bungee版はネットワーク統計のみ表示（サーバー統計は非表示）
+- **Plan連携**: Bukkit版は全統計表示（プレイヤー、サーバー、ネットワーク）
+- **ドキュメント**: README.md - Bungeecordプラグインの説明追加
+- **ドキュメント**: BUNGEECORD_SETUP.md - 2つのインストール方法を詳説
+- **ドキュメント**: Bukkit版とBungee版の比較表を追加
+- **重大なバグ修正**: DatabaseManagerのResultSetリソースリークを修正（継続）
 
 ### v2.1.9 - 重複テーブル表示の修正 (2026-02-03)
 - **バグ修正**: Planでテーブルが2つずつ表示される問題を修正

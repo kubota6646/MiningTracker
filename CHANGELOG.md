@@ -4,29 +4,57 @@
 
 ### 🚀 新機能 / New Features
 
-#### Bungeecord/Velocityネットワーク対応
-- **Bungeecord対応**: Bungeecord/Velocityネットワーク環境での動作を正式サポート
-- **ネットワーク統計**: 複数のバックエンドサーバーからデータを自動集約
-- **Plan連携**: Planネットワークページに採掘統計を表示
-- **サーバー比較**: Planのネットワークページでサーバー間の採掘量を比較可能
-- **マルチサーバー対応**: 各バックエンドサーバーで`server-name`を設定してサーバー別統計を記録
+#### Bungeecordプラグイン対応 ⭐
+- **MiningTracker-Bungee**: Bungeecordプロキシに直接インストール可能な新プラグイン
+- **ネットワーク統計のみ表示**: サーバー統計を非表示、ネットワーク統計のみをPlanに表示
+- **MySQL専用**: Bungee版はMySQLのみ対応（SQLiteは不可）
+- **読み取り専用**: 採掘トラッキングなし、統計の表示のみ
+
+#### マルチモジュール化
+- **アーキテクチャ変更**: Gradleマルチモジュールプロジェクトに変更
+  - `miningtracker-common`: 共通コード（ConfigAdapter, CommonDatabaseManager）
+  - `miningtracker-bukkit`: Bukkitプラグイン（既存機能をすべて維持）
+  - `miningtracker-bungee`: Bungeecordプラグイン（ネットワーク統計のみ）
+
+#### 共通モジュール
+- **ConfigAdapter Interface**: Bukkit/Bungeeの設定を統一的に扱う抽象化
+- **CommonDatabaseManager**: プラットフォーム非依存のデータベース処理
+- **BukkitConfigAdapter**: Bukkit用の設定アダプター実装
+- **BungeeConfigAdapter**: Bungee用の設定アダプター実装
 
 ### 📚 ドキュメント / Documentation
 
-#### 新規ドキュメント追加
-- **BUNGEECORD_SETUP.md**: Bungeecord環境での詳細なセットアップガイド
-  - MySQL共有データベース設定
-  - Plan Player Analytics設定方法
-  - MiningTrackerの各サーバー設定例
-  - トラブルシューティングガイド
+#### 新規追加・更新
+- **README.md**: Bungeecordプラグインの説明を追加
+  - 2つのインストール方法を明記（バックエンドのみ vs プロキシにも）
+  - Bukkit版とBungee版の比較表
+- **BUNGEECORD_SETUP.md**: Bungee版の詳細な説明を追加
+  - インストール方法の選択ガイド
+  - Bungee版の設定例
+  - Bukkit版との違いを明示
+- **bungee.yml**: Bungeecordプラグイン記述ファイル
+- **config.yml (Bungee用)**: Bungeecord版の設定ファイルテンプレート
 
-#### 既存ドキュメント更新
-- **PLAN_INTEGRATION.md**: Bungeecord対応の情報を追加
-- **README.md**: Bungeecord対応の情報を追加、主な機能セクションを更新
+### 🔧 技術詳細 / Technical Details
 
-### 🐛 重大なバグ修正 / Critical Bug Fix
+#### Plan連携
+- **Bukkit版**: すべての統計を表示
+  - プレイヤー統計 ✓
+  - サーバー統計 ✓
+  - ネットワーク統計 ✓
+- **Bungee版**: ネットワーク統計のみ表示
+  - プレイヤー統計 ✗
+  - サーバー統計 ✗
+  - ネットワーク統計 ✓
 
-#### DatabaseManagerのリソースリーク修正
+#### ビルド成果物
+- `MiningTracker-Bukkit-2.2.0.jar`: バックエンドサーバー用
+- `MiningTracker-Bungee-2.2.0.jar`: Bungeecordプロキシ用
+- `MiningTracker-Common-2.2.0.jar`: 共通ライブラリ（shadowJarに含まれる）
+
+### 🐛 バグ修正 / Bug Fixes
+
+#### DatabaseManagerのリソースリーク修正（継続）
 - **問題**: ResultSetオブジェクトが適切に閉じられておらず、リソースリークが発生
 - **原因**: 30箇所のResultSet宣言がtry-with-resourcesで管理されていなかった
 - **修正内容**: すべてのResultSetをtry-with-resources文で適切に管理するように修正
