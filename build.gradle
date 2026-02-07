@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '8.1.7' apply false
+    id 'com.gradleup.shadow' version '8.3.3' apply false
 }
 
 group = 'com.kubota6646'
@@ -8,7 +8,7 @@ version = '2.3.6'
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'com.gradleup.shadow'
     
     group = rootProject.group
     version = rootProject.version
