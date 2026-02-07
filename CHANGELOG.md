@@ -1,5 +1,23 @@
 # 変更履歴 / Changelog
 
+## [2.3.2] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fixes
+
+#### Bungeecord APIバージョン修正
+- **重大なバグ修正**: Bungeecord APIの正しいバージョンに修正
+- **問題**: `miningtracker-bungee`コンパイルエラー - Bungeecord APIが見つからない
+- **原因**: `net.md-5:bungeecord-api:1.21-R0.1-SNAPSHOT`が存在しない。BungeecordはSNAPSHOT版を使用しない
+- **解決**: 正しい安定版バージョンに変更
+  - `net.md-5:bungeecord-api:1.21-R0.4`
+- **影響**: Bungeecordモジュールのコンパイルエラー解消、ビルド成功
+
+### 📦 依存関係管理
+- Bungeecord API最新安定版（1.21-R0.4）を使用
+- Maven Centralから正常に解決可能
+
+---
+
 ## [2.3.1] - 2026-02-07
 
 ### 🐛 バグ修正 / Bug Fixes
