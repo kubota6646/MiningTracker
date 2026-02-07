@@ -8,7 +8,7 @@ Minecraft 1.21.x対応のプレイヤー採掘トラッキングプラグイン
 
 ## バージョン情報
 
-- **最新バージョン**: 2.4.0
+- **最新バージョン**: 2.5.0
 - **対応Minecraft**: 1.21.x
 - **必須Java**: 21以降
 - **Bungeecord対応**: ✅ 完全対応（v2.2.0以降）
@@ -16,6 +16,7 @@ Minecraft 1.21.x対応のプレイヤー採掘トラッキングプラグイン
 - **リアルタイム同期**: ✅ 修正済み（v2.3.4以降）⭐ NEW
 - **Plan統計表示**: ✅ 修正済み（v2.3.5以降）⭐ NEW
 - **SLF4Jログ**: ✅ 完全修正（v2.3.9）⭐ NEW
+- **統計インポート**: ✅ Minecraft統計から自動インポート（v2.5.0）⭐ NEW
 
 ## 概要
 
@@ -26,6 +27,7 @@ MiningTrackerは、各プレイヤーがどのブロックをどれだけ採掘�
 ## 主な機能
 
 - **採掘トラッキング**: プレイヤーが破壊したブロックを自動的に記録
+- **統計インポート**: Minecraftの統計ファイルから既存データを自動インポート ⭐ NEW (v2.5.0)
 - **統計表示**: 自分や他のプレイヤーの採掘統計をコマンドで確認
 - **ランキング表示**: 全プレイヤーの採掘量をランキング形式で表示
 - **Bungeecord対応**: 複数サーバー間でデータを統合管理、ネットワークページに表示
@@ -64,8 +66,8 @@ gradle build
 ```
 
 ビルドが成功すると、以下のJARファイルが生成されます：
-- **Bukkit/Paper用**: `miningtracker-bukkit/build/libs/MiningTracker-Bukkit-2.3.2.jar`
-- **Bungeecord用**: `miningtracker-bungee/build/libs/MiningTracker-Bungee-2.3.2.jar`
+- **Bukkit/Paper用**: `miningtracker-bukkit/build/libs/MiningTracker-Bukkit-2.5.0.jar`
+- **Bungeecord用**: `miningtracker-bungee/build/libs/MiningTracker-Bungee-2.5.0.jar`
 
 ⚠️ **重要**: 2つの異なるJARファイルがあります。用途に応じて正しいものを使用してください！
 
@@ -73,26 +75,26 @@ gradle build
 
 ### シングルサーバー（Bukkit/Paper）
 
-1. **`MiningTracker-Bukkit-2.3.2.jar`**をサーバーの`plugins`フォルダにコピー
+1. **`MiningTracker-Bukkit-2.5.0.jar`**をサーバーの`plugins`フォルダにコピー
 2. サーバーを再起動
 3. `plugins/MiningTracker`フォルダに設定ファイルが自動生成されます
 
 ### Bungeecordネットワーク
 
 #### バックエンドサーバー（推奨）
-各バックエンドサーバーに**`MiningTracker-Bukkit-2.3.2.jar`**をインストール：
+各バックエンドサーバーに**`MiningTracker-Bukkit-2.5.0.jar`**をインストール：
 ```bash
 # Survival サーバー
-cp MiningTracker-Bukkit-2.3.2.jar /path/to/survival/plugins/
+cp MiningTracker-Bukkit-2.5.0.jar /path/to/survival/plugins/
 
 # Creative サーバー
-cp MiningTracker-Bukkit-2.3.2.jar /path/to/creative/plugins/
+cp MiningTracker-Bukkit-2.5.0.jar /path/to/creative/plugins/
 ```
 
 #### Bungeecordプロキシ（オプション）
-ネットワーク統計のみ表示する場合、**`MiningTracker-Bungee-2.3.2.jar`**をプロキシにインストール：
+ネットワーク統計のみ表示する場合、**`MiningTracker-Bungee-2.5.0.jar`**をプロキシにインストール：
 ```bash
-cp MiningTracker-Bungee-2.3.2.jar /path/to/bungeecord/plugins/
+cp MiningTracker-Bungee-2.5.0.jar /path/to/bungeecord/plugins/
 ```
 
 ⚠️ **注意**:
@@ -263,6 +265,10 @@ tracking:
   count-creative: false     # クリエイティブモードでの採掘をカウント
   count-silk-touch: true    # シルクタッチでの採掘をカウント
 
+# Minecraft統計インポート設定
+import:
+  enabled: true             # 既存データがない場合にMinecraft統計からインポート
+
 # ランキング設定
 ranking:
   per-page: 10             # 1ページあたりの表示件数
@@ -278,6 +284,33 @@ messages:
 
 プラグインのすべてのメッセージをカスタマイズできます。
 カラーコードは`&`を使用します（例: `&a` = 緑、`&e` = 黄色）。
+
+## Minecraft統計インポート機能
+
+**v2.5.0の新機能**: 既存のデータが存在しない場合、Minecraftの内蔵統計ファイルから採掘データを自動的にインポートできます。
+
+### 動作の仕組み
+
+1. プレイヤーが `/mtstats` コマンドを実行
+2. データベースに採掘データが存在しない場合、自動的に統計ファイルを検索
+3. `world/stats/<プレイヤーUUID>.json` から `minecraft:mined` セクションを読み込み
+4. ブロック採掘データをデータベースに一括インポート
+5. インポート後の統計を表示
+
+### 設定
+
+```yaml
+import:
+  enabled: true  # true: 自動インポート有効、false: 無効
+```
+
+### 利点
+
+- **データの引き継ぎ**: バニラの採掘統計を失わない
+- **新規プレイヤーに優しい**: 過去の採掘実績が自動的に認識される
+- **シームレスな移行**: プラグイン導入前のデータも活用
+
+詳細は [MINECRAFT_STATS_IMPORT.md](MINECRAFT_STATS_IMPORT.md) を参照してください。
 
 ## 使用例
 

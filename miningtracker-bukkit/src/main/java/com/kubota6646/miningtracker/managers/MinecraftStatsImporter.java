@@ -85,8 +85,13 @@ public class MinecraftStatsImporter {
      */
     private File getStatsFile(UUID playerUUID) {
         // メインワールドの統計フォルダを取得
-        World mainWorld = Bukkit.getWorlds().get(0);
+        // ワールドリストが空の場合に備えてstream().findFirst()を使用
+        World mainWorld = Bukkit.getWorlds().stream()
+            .findFirst()
+            .orElse(null);
+        
         if (mainWorld == null) {
+            plugin.getLogger().warning("ワールドが見つかりません。統計をインポートできません。");
             return null;
         }
         

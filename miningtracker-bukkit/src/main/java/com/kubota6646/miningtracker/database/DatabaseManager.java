@@ -384,8 +384,8 @@ public class DatabaseManager {
                 pstmt.setString(2, playerName);
                 pstmt.setString(3, material.name());
                 pstmt.setString(4, serverName);
-                pstmt.setInt(5, count);
-                pstmt.setInt(6, count);
+                pstmt.setInt(5, count);  // INSERT時の初期count値
+                pstmt.setInt(6, count);  // UPDATE時に既存countに加算する値
                 pstmt.setString(7, playerName);
                 pstmt.executeUpdate();
                 // autoCommit=trueなので、ここで自動的にコミットされている
@@ -405,8 +405,8 @@ public class DatabaseManager {
                     pstmt.setString(2, playerName);
                     pstmt.setString(3, material.name());
                     pstmt.setString(4, serverName);
-                    pstmt.setInt(5, count);
-                    pstmt.setInt(6, count);
+                    pstmt.setInt(5, count);  // INSERT時の初期count値
+                    pstmt.setInt(6, count);  // UPDATE時に既存countに加算する値
                     pstmt.setString(7, playerName);
                     pstmt.executeUpdate();
                     // autoCommit=trueなので、ここで自動的にコミットされている
