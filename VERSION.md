@@ -2,9 +2,22 @@
 
 ## 現在のバージョン
 
-**v2.3.6** (2026-02-07)
+**v2.3.7** (2026-02-07)
 
 ## バージョン履歴
+
+### v2.3.7 - Shadow plugin移行（新プラグインID） (2026-02-07)
+- **ビルドエラー修正**: 「Plugin 'com.github.johnrengelman.shadow' version '8.1.7' was not found」エラー解消
+- **問題**: Shadow plugin version 8.1.7が存在しない
+- **根本原因**:
+  - v2.3.6で指定した8.1.7は存在しないバージョン
+  - 旧プラグインID（`com.github.johnrengelman.shadow`）の最終版は8.1.1
+  - Java 21完全サポートには新プラグインID（`com.gradleup.shadow`）が必要
+- **解決**:
+  - プラグインID変更: `com.github.johnrengelman.shadow` → `com.gradleup.shadow`
+  - バージョン: 8.3.3に更新（Java 21完全サポート）
+  - 組織移行: John Rengelman → GradleUp
+- **影響**: ビルドが正常に完了し、最新のShadow pluginでメンテナンス継続
 
 ### v2.3.6 - Shadow plugin & Gradle更新 (2026-02-07)
 - **ビルドエラー修正**: shadowJarタスクの「Unsupported class file major version 65」エラー解消

@@ -1,5 +1,31 @@
 # 変更履歴 / Changelog
 
+## [2.3.7] - 2026-02-07
+
+### 🔧 ビルドエラー修正 / Build Fix
+
+#### Shadow plugin移行（新プラグインID）
+- **ビルドエラー修正**: 「Plugin 'com.github.johnrengelman.shadow' version '8.1.7' was not found」エラー解消
+- **問題**:
+  ```
+  Plugin [id: 'com.github.johnrengelman.shadow', version: '8.1.7', apply: false] was not found
+  ```
+- **根本原因**:
+  - v2.3.6で指定したShadow plugin 8.1.7が存在しない
+  - 旧プラグインID（`com.github.johnrengelman.shadow`）はメンテナンス終了
+  - 最終版は8.1.1で、Java 21完全サポートには不十分
+- **解決**:
+  - **プラグインID変更**: `com.github.johnrengelman.shadow` → `com.gradleup.shadow`
+  - **バージョン更新**: 8.3.3に更新
+    - Java 21完全サポート（class file version 65対応）
+    - Gradle 8.3+対応（現在8.9使用中）
+    - ASMライブラリ最新化
+  - **組織移行**: John Rengelman → GradleUp
+- **影響**: 
+  - ビルドエラー完全解消
+  - Java 21環境で安定動作
+  - 最新のShadow pluginでメンテナンス継続
+
 ## [2.3.6] - 2026-02-07
 
 ### 🔧 ビルドエラー修正 / Build Fix
