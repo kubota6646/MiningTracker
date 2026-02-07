@@ -133,10 +133,13 @@ public class CommonDatabaseManager {
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             if (rs.next()) {
-                return rs.getLong(1);
+                long total = rs.getLong(1);
+                // rs.wasNull()をチェックしてNULLの場合は0を返す
+                return rs.wasNull() ? 0 : total;
             }
         } catch (SQLException e) {
             logger.warning("ネットワーク総採掘数取得エラー: " + e.getMessage());
+            e.printStackTrace();
         }
         return 0;
     }

@@ -747,11 +747,14 @@ public class DatabaseManager {
                 pstmt.setString(1, serverName);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getLong("total");
+                        long total = rs.getLong("total");
+                        // rs.wasNull()をチェックしてNULLの場合は0を返す
+                        return rs.wasNull() ? 0 : total;
                     }
                 }
             } catch (SQLException e) {
-                plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
+                plugin.getLogger().warning("サーバー総採掘数取得エラー: " + e.getMessage());
+                e.printStackTrace();
             }
         } else {
             try {
@@ -760,12 +763,15 @@ public class DatabaseManager {
                     pstmt.setString(1, serverName);
                     try (ResultSet rs = pstmt.executeQuery()) {
                         if (rs.next()) {
-                            return rs.getLong("total");
+                            long total = rs.getLong("total");
+                            // rs.wasNull()をチェックしてNULLの場合は0を返す
+                            return rs.wasNull() ? 0 : total;
                         }
                     }
                 }
             } catch (SQLException e) {
-                plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
+                plugin.getLogger().warning("サーバー総採掘数取得エラー: " + e.getMessage());
+                e.printStackTrace();
             }
         }
         return 0;
@@ -869,11 +875,14 @@ public class DatabaseManager {
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getLong("total");
+                        long total = rs.getLong("total");
+                        // rs.wasNull()をチェックしてNULLの場合は0を返す
+                        return rs.wasNull() ? 0 : total;
                     }
                 }
             } catch (SQLException e) {
-                plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
+                plugin.getLogger().warning("ネットワーク総採掘数取得エラー: " + e.getMessage());
+                e.printStackTrace();
             }
         } else {
             try {
@@ -881,12 +890,15 @@ public class DatabaseManager {
                 try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                     try (ResultSet rs = pstmt.executeQuery()) {
                         if (rs.next()) {
-                            return rs.getLong("total");
+                            long total = rs.getLong("total");
+                            // rs.wasNull()をチェックしてNULLの場合は0を返す
+                            return rs.wasNull() ? 0 : total;
                         }
                     }
                 }
             } catch (SQLException e) {
-                plugin.getLogger().warning("統計取得エラー: " + e.getMessage());
+                plugin.getLogger().warning("ネットワーク総採掘数取得エラー: " + e.getMessage());
+                e.printStackTrace();
             }
         }
         return 0;
