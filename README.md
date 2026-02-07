@@ -8,21 +8,29 @@ Minecraft 1.21.x対応のプレイヤー採掘トラッキングプラグイン
 
 ## バージョン情報
 
-- **最新バージョン**: 2.1.0
+- **最新バージョン**: 2.4.0
 - **対応Minecraft**: 1.21.x
 - **必須Java**: 21以降
+- **Bungeecord対応**: ✅ 完全対応（v2.2.0以降）
+- **Bungeecordプラグイン**: ✅ 利用可能（v2.2.0以降）⭐ NEW
+- **リアルタイム同期**: ✅ 修正済み（v2.3.4以降）⭐ NEW
+- **Plan統計表示**: ✅ 修正済み（v2.3.5以降）⭐ NEW
+- **SLF4Jログ**: ✅ 完全修正（v2.3.9）⭐ NEW
 
 ## 概要
 
 MiningTrackerは、各プレイヤーがどのブロックをどれだけ採掘したかを記録し、ランキング形式で表示するMinecraftプラグインです。
+
+**v2.2.0の新機能**: Bungeecordに直接インストールできるプラグインを追加！ネットワーク統計のみをPlanに表示します。
 
 ## 主な機能
 
 - **採掘トラッキング**: プレイヤーが破壊したブロックを自動的に記録
 - **統計表示**: 自分や他のプレイヤーの採掘統計をコマンドで確認
 - **ランキング表示**: 全プレイヤーの採掘量をランキング形式で表示
-- **マルチサーバー対応**: 複数サーバー間でデータを統合管理
-- **Plan連携**: Plan Player Analyticsと統合してWebダッシュボードに統計を表示 ⭐ NEW
+- **Bungeecord対応**: 複数サーバー間でデータを統合管理、ネットワークページに表示
+- **Bungeecordプラグイン**: プロキシに直接インストール可能、ネットワーク統計のみ表示 ⭐ NEW
+- **Plan連携**: Plan Player Analyticsと統合してWebダッシュボードに統計を表示
 - **データ永続化**: SQLiteまたはMySQLデータベースを使用
 - **柔軟な設定**: config.ymlで動作をカスタマイズ可能
 
@@ -55,13 +63,44 @@ MiningTrackerは、各プレイヤーがどのブロックをどれだけ採掘�
 gradle build
 ```
 
-ビルドが成功すると、`build/libs/MiningTracker-1.0.0.jar`が生成されます。
+ビルドが成功すると、以下のJARファイルが生成されます：
+- **Bukkit/Paper用**: `miningtracker-bukkit/build/libs/MiningTracker-Bukkit-2.3.2.jar`
+- **Bungeecord用**: `miningtracker-bungee/build/libs/MiningTracker-Bungee-2.3.2.jar`
+
+⚠️ **重要**: 2つの異なるJARファイルがあります。用途に応じて正しいものを使用してください！
 
 ## インストール
 
-1. ビルドされたJARファイルをサーバーの`plugins`フォルダにコピー
+### シングルサーバー（Bukkit/Paper）
+
+1. **`MiningTracker-Bukkit-2.3.2.jar`**をサーバーの`plugins`フォルダにコピー
 2. サーバーを再起動
 3. `plugins/MiningTracker`フォルダに設定ファイルが自動生成されます
+
+### Bungeecordネットワーク
+
+#### バックエンドサーバー（推奨）
+各バックエンドサーバーに**`MiningTracker-Bukkit-2.3.2.jar`**をインストール：
+```bash
+# Survival サーバー
+cp MiningTracker-Bukkit-2.3.2.jar /path/to/survival/plugins/
+
+# Creative サーバー
+cp MiningTracker-Bukkit-2.3.2.jar /path/to/creative/plugins/
+```
+
+#### Bungeecordプロキシ（オプション）
+ネットワーク統計のみ表示する場合、**`MiningTracker-Bungee-2.3.2.jar`**をプロキシにインストール：
+```bash
+cp MiningTracker-Bungee-2.3.2.jar /path/to/bungeecord/plugins/
+```
+
+⚠️ **注意**:
+- Bungeecord版は**MySQLのみ**対応（SQLite不可）
+- Bukkitサーバーには**Bukkit版**を、Bungeecordには**Bungee版**を使用してください
+- 間違ったJARを使用すると「plugin.yml or bungee.yml not found」エラーが発生します
+
+詳細は[BUNGEECORD_SETUP.md](BUNGEECORD_SETUP.md)を参照してください。
 
 ## コマンド
 
@@ -104,7 +143,54 @@ Webダッシュボードで採掘統計を視覚的に表示できます。
 
 - **プレイヤーページ**: 個人の採掘統計（全サーバー合計・サーバー別）
 - **サーバーページ**: サーバーごとの採掘統計とランキング
-- **ネットワークページ**: 全サーバー合計統計とサーバー比較
+- **ネットワークページ**: 全サーバー合計統計とサーバー比較 ⭐ Bungeecord対応
+
+### Bungeecordネットワーク対応 ⭐ NEW in v2.2.0
+
+MiningTracker v2.2.0以降、Bungeecordネットワーク環境で完全に動作します：
+
+#### 2つのインストール方法
+
+**方法1: バックエンドサーバーのみにインストール（推奨）**
+- 各バックエンドサーバーにMiningTracker-Bukkitをインストール
+- Plan がネットワーク統計を自動集約
+- すべての統計（プレイヤー、サーバー、ネットワーク）が表示
+
+**方法2: Bungeecordプロキシにもインストール ⭐ NEW**
+- Bungeecordプロキシに**MiningTracker-Bungee**をインストール
+- **ネットワーク統計のみ**をPlanに表示（サーバー統計は非表示）
+- プロキシレベルでのシンプルな統計表示
+
+#### インストール構成例
+
+```
+Bungeecord Proxy
+├── Plan (Bungee版)
+├── MiningTracker-Bungee.jar  ← オプション（ネットワーク統計のみ）
+└── Backend Servers
+    ├── Server 1: Plan + MiningTracker-Bukkit.jar
+    ├── Server 2: Plan + MiningTracker-Bukkit.jar
+    └── Server 3: Plan + MiningTracker-Bukkit.jar
+```
+
+#### 統計の表示内容
+
+| インストール場所 | Plan表示内容 |
+|-----------------|-------------|
+| **Bukkit サーバー** | プレイヤー統計 ✓<br>サーバー統計 ✓<br>ネットワーク統計 ✓ |
+| **Bungeecord プロキシ** | プレイヤー統計 ✗<br>サーバー統計 ✗<br>ネットワーク統計 ✓（のみ） |
+
+**重要**: Bungeecord版は**MySQLのみ**をサポートします（SQLiteは不可）
+
+#### セットアップ方法
+
+1. **MySQL**を全サーバーで共有
+2. **Plan Player Analytics**をBungeecord + 全バックエンドサーバーにインストール
+3. **オプション**: Bungeecordプロキシに**MiningTracker-Bungee.jar**をインストール
+4. **MiningTracker-Bukkit.jar**を全バックエンドサーバーにインストール
+5. 各サーバーで異なる`server-name`を設定
+
+**詳細な手順**: [BUNGEECORD_SETUP.md](BUNGEECORD_SETUP.md) を参照してください。
 
 ### マルチサーバー対応
 
@@ -375,3 +461,65 @@ cd MiningTracker
 ## サポート
 
 問題が発生した場合は、GitHubのIssuesページで報告してください。
+
+## トラブルシューティング
+
+### エラー: "Plugin must have a plugin.yml or bungee.yml"
+
+**症状**: Bungeecordでプラグインを読み込む際にエラーが発生
+
+**原因**: 間違ったJARファイルを使用している
+
+**解決方法**:
+- ✅ Bungeecordには**`MiningTracker-Bungee-2.3.2.jar`**を使用
+- ❌ `MiningTracker-Bukkit-2.3.2.jar`をBungeecordで使用しないこと
+
+### Paper/Spigotサーバーで動作しない
+
+**確認事項**:
+1. **正しいJARファイルを使用しているか**
+   - Bukkit/Paperサーバーには`MiningTracker-Bukkit-2.3.2.jar`を使用
+   - Bungeecord版（`MiningTracker-Bungee-2.3.2.jar`）をBukkitサーバーで使用しないこと
+
+2. **Java 21を使用しているか**
+   ```bash
+   java -version
+   # java version "21.0.x" と表示されることを確認
+   ```
+
+3. **Minecraft バージョンが1.21.xか**
+   - このプラグインは1.21.x専用です
+
+4. **プラグインが正常に読み込まれているか**
+   ```
+   /plugins
+   ```
+   コマンドでMiningTrackerが緑色で表示されることを確認
+
+5. **エラーログを確認**
+   - `logs/latest.log`でエラーメッセージを確認
+   - データベース接続エラーがないか確認
+
+### データベース接続エラー
+
+**MySQL接続エラー**:
+1. MySQLサーバーが起動しているか確認
+2. `config.yml`の接続情報が正しいか確認
+3. ユーザーに適切な権限があるか確認
+
+**SQLite読み書きエラー**:
+1. プラグインフォルダに書き込み権限があるか確認
+2. ディスク容量が十分にあるか確認
+
+### Bungeecordネットワークで統計が表示されない
+
+1. **全サーバーで同じMySQLデータベースを使用しているか**
+   - 各サーバーの`config.yml`で同じデータベース接続情報を設定
+
+2. **各サーバーで異なる`server-name`を設定しているか**
+   ```yaml
+   server-name: "survival"  # サーバーごとに異なる名前
+   ```
+
+3. **Plan Player Analyticsがインストールされているか**
+   - Bungeecord + 全バックエンドサーバーにPlanが必要

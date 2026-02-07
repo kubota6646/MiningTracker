@@ -1,0 +1,43 @@
+dependencies {
+    implementation project(':miningtracker-common')
+    compileOnly 'org.spigotmc:spigot-api:1.21-R0.1-SNAPSHOT'
+    compileOnly 'com.github.plan-player-analytics:Plan:5.6.2959'
+    
+    // Database dependencies (needed by DatabaseManager)
+    implementation 'com.mysql:mysql-connector-j:8.3.0'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+    implementation 'org.slf4j:slf4j-jdk14:2.0.9'
+}
+
+shadowJar {
+    archiveBaseName.set('MiningTracker-Bukkit')
+    archiveClassifier.set('')
+    archiveVersion.set(version)
+    
+    // Include common module and dependencies
+    configurations = [project.configurations.runtimeClasspath]
+    
+    // Ensure resources are included
+    from(sourceSets.main.output)
+    
+    // Relocate dependencies to avoid conflicts (but NOT SLF4J - it needs to use JUL)
+    relocate 'com.zaxxer.hikari', 'com.kubota6646.miningtracker.lib.hikari'
+    relocate 'com.mysql', 'com.kubota6646.miningtracker.lib.mysql'
+    // SLF4J is NOT relocated - slf4j-jdk14 needs to bridge to java.util.logging
+    
+    // Merge service files for SLF4J provider discovery
+    mergeServiceFiles()
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+build {
+    dependsOn shadowJar
+}

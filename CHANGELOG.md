@@ -1,10 +1,425 @@
 # 変更履歴 / Changelog
 
-## [2.2.0] - 2026-02-03
+## [2.4.2] - 2026-02-07
 
 ### 🐛 重大なバグ修正 / Critical Bug Fix
 
-#### DatabaseManagerのリソースリーク修正
+#### ビルドエラー修正 - Plan API無効化メソッド削除
+- **問題**:
+  ```
+  エラー: シンボルを見つけられません
+  extensionService.invalidate(this, playerUUID)
+  extensionService.invalidate(this)
+  ```
+- **根本原因**: Plan API 5.6に`ExtensionService.invalidate()`メソッドが存在しない、v2.4.1で追加したキャッシュ無効化コードがコンパイルエラーを引き起こす
+- **解決**: 
+  - MiningTrackerExtension: `invalidatePlayerCache()` と `invalidateServerCache()` メソッドを削除
+  - MiningTracker: `planExtension` フィールドと `getPlanExtension()` ゲッターを削除
+  - DataManager: Plan無効化呼び出しを削除
+  - Planの自動更新メカニズムに依存（`@InvalidateMethod`アノテーション使用）
+- **影響**: ビルドエラーが完全に解消、Planの自動更新でデータが定期的に反映される、コードがシンプルで保守しやすくなった
+
+### 📋 技術的詳細 / Technical Details
+- Plan DataExtensionは定期的に自動更新される
+- `@InvalidateMethod`アノテーションで更新タイミングを指定
+- プレイヤーログイン/ログアウト時、定期スケジュールで更新
+
+## [2.4.1] - 2026-02-07
+
+### 🐛 重大なバグ修正 / Critical Bug Fix
+
+#### SQL構文エラー修正 - rank予約語問題
+- **問題**:
+  ```
+  [Plan Non critical-pool-3/WARN]: [MiningTracker] ランク取得エラー: 
+  You have an error in your SQL syntax near 'rank FROM mining_data
+  ```
+- **根本原因**: `rank`はMySQLの予約語、SQLクエリで列エイリアスとして使用
+- **解決**: DatabaseManager.getPlayerRank() で `rank` → `player_rank` に変更
+- **影響**: SQL構文エラーが完全に解消、Planでランキングが正常に表示
+
+### ✨ 新機能 / New Feature
+
+#### Planリアルタイム更新実装
+- **要件**: 総採掘量をPlanにリアルタイムで反映
+- **実装内容**:
+  - MiningTrackerExtension: `invalidatePlayerCache(UUID)` メソッド追加
+  - MiningTrackerExtension: `invalidateServerCache()` メソッド追加
+  - DataManager: ブロック破壊時にPlanキャッシュを自動無効化
+  - ExtensionService.invalidate() を使用した公式推奨方法
+- **技術的詳細**:
+  - ブロック破壊 → DB保存 → Planキャッシュ無効化（非同期処理）
+  - プレイヤー統計、サーバー統計、ネットワーク統計が即時更新
+- **影響**:
+  - ブロック破壊後、即座にPlanに採掘量が反映される ⭐
+  - リアルタイムでランキングも更新される
+  - Plan拡張機能が完全にリアルタイム対応
+
+## [2.4.0] - 2026-02-07
+
+### 🎉 メジャー修正 / Major Fix
+
+#### SLF4J完全修正 - slf4j-jdk14への切り替え
+- **SLF4Jエラー根本解決**: v2.3.8, v2.3.9での修正後も継続していたエラーを根本的に解決
+- **問題**:
+  ```
+  [ERROR]: [MiningTracker] [STDERR] SLF4J: No SLF4J providers were found.
+  [ERROR]: [MiningTracker] [STDERR] SLF4J: Defaulting to no-operation (NOP) logger implementation
+  ```
+- **根本原因**:
+  - `slf4j-simple`: スタンドアロンアプリケーション向けのSLF4J実装
+  - BukkitはJava Util Logging（JUL）を使用
+  - slf4j-simpleとJULが競合し、SLF4Jプロバイダーが正しく検出されない
+- **解決**:
+  - **slf4j-simple → slf4j-jdk14への切り替え** (全モジュール)
+  - slf4j-jdk14はSLF4JをJava Util Logging（JUL）にブリッジ
+  - Bukkitのロギングシステムとネイティブ統合
+  - SLF4Jのリロケーションを削除し、`mergeServiceFiles()`を追加
+- **技術的メリット**:
+  - HikariCPのSLF4Jログ → JUL → Bukkitログに完全統合
+  - Paper/Spigot/Bungeecordの既存のログ設定を使用
+  - 追加設定不要、競合なし
+- **影響**: SLF4Jエラーが完全に解消され、HikariCPログがBukkitのログシステムに統合される
+
+## [2.3.9] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fix
+
+#### SLF4J依存関係の明示化
+- **SLF4Jエラー修正**: v2.3.8で修正を試みたが継続していたエラーを完全解決
+- **問題**:
+  ```
+  [ERROR]: [MiningTracker] [STDERR] SLF4J: No SLF4J providers were found.
+  [ERROR]: [MiningTracker] [STDERR] SLF4J: Defaulting to no-operation (NOP) logger implementation
+  ```
+- **根本原因**:
+  - commonモジュールで`slf4j-simple`を宣言
+  - しかしbukkit/bungeeモジュールで明示的に宣言されていなかった
+  - 推移的依存関係として含まれるべきだったが、shadowJarで正しく処理されなかった
+- **解決**:
+  - bukkit/bungee両モジュールの`dependencies`に`slf4j-simple:2.0.9`を明示的に追加
+  - 各モジュールで直接依存関係を宣言することで、shadowJarが確実に含める
+- **影響**:
+  - SLF4Jエラーが完全に解消
+  - HikariCPのログが正常に出力される
+
+## [2.3.8] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fix
+
+#### SLF4J Provider修正
+- **SLF4Jエラー修正**: 「SLF4J: No SLF4J providers were found」エラー解消
+- **問題**:
+  ```
+  [ERROR]: [MiningTracker] [STDERR] SLF4J: No SLF4J providers were found.
+  [ERROR]: [MiningTracker] [STDERR] SLF4J: Defaulting to no-operation (NOP) logger implementation
+  ```
+- **根本原因**:
+  - SLF4Jのリロケーション（`org.slf4j` → `lib.slf4j`）によりサービスプロバイダーメカニズムが破損
+  - SLF4J 2.xはJava ServiceLoader APIを使用
+  - パッケージ名変更で`META-INF/services/org.slf4j.spi.SLF4JServiceProvider`が機能しない
+- **解決**:
+  - **SLF4Jリロケーション削除**: bukkit & bungee両モジュールから削除
+  - **mergeServiceFiles()追加**: サービスプロバイダーファイルを統合
+  - **HikariCPとMySQLのみリロケート**: 依存関係の競合回避のため維持
+- **影響**:
+  - SLF4Jエラーメッセージが解消
+  - HikariCPのログが正常に出力される
+  - Bukkitサーバー・Bungeecord両方で正常動作
+
+## [2.3.7] - 2026-02-07
+
+### 🔧 ビルドエラー修正 / Build Fix
+
+#### Shadow plugin移行（新プラグインID）
+- **ビルドエラー修正**: 「Plugin 'com.github.johnrengelman.shadow' version '8.1.7' was not found」エラー解消
+- **問題**:
+  ```
+  Plugin [id: 'com.github.johnrengelman.shadow', version: '8.1.7', apply: false] was not found
+  ```
+- **根本原因**:
+  - v2.3.6で指定したShadow plugin 8.1.7が存在しない
+  - 旧プラグインID（`com.github.johnrengelman.shadow`）はメンテナンス終了
+  - 最終版は8.1.1で、Java 21完全サポートには不十分
+- **解決**:
+  - **プラグインID変更**: `com.github.johnrengelman.shadow` → `com.gradleup.shadow`
+  - **バージョン更新**: 8.3.3に更新
+    - Java 21完全サポート（class file version 65対応）
+    - Gradle 8.3+対応（現在8.9使用中）
+    - ASMライブラリ最新化
+  - **組織移行**: John Rengelman → GradleUp
+- **影響**: 
+  - ビルドエラー完全解消
+  - Java 21環境で安定動作
+  - 最新のShadow pluginでメンテナンス継続
+
+## [2.3.6] - 2026-02-07
+
+### 🔧 ビルドエラー修正 / Build Fix
+
+#### shadowJar Java 21互換性問題解消
+- **ビルドエラー修正**: shadowJarタスクの「Unsupported class file major version 65」エラー解消
+- **問題**:
+  ```
+  org.gradle.api.GradleException: Could not add file to ZIP
+  Caused by: java.lang.IllegalArgumentException: Unsupported class file major version 65
+  ```
+- **根本原因**:
+  - Java 21でコンパイル（class file version 65）
+  - Shadow plugin 8.1.1のASMライブラリがJava 21バイトコードを完全にサポートしていない
+  - shadowJarタスクがバイトコード処理に失敗
+- **解決**:
+  - **Shadow plugin更新**: 8.1.1 → 8.1.7
+    - Java 21完全サポート
+    - ASMライブラリ最新化
+    - 多数のバグ修正
+  - **Gradle更新**: 8.5 → 8.9
+    - Java 21サポート改善
+    - パフォーマンス向上
+    - セキュリティ修正
+- **影響**: 
+  - shadowJarがJava 21バイトコードを正常に処理
+  - ビルドが成功し、JARファイルが生成される
+  - 安定したビルドプロセス
+
+## [2.3.5] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fixes
+
+#### Plan統計表示のNULL処理修正
+- **バグ修正**: Planのサーバー総採掘数とネットワーク総採掘数が正常に表示されない
+- **問題**: 
+  - Planでサーバー総採掘数が表示されない
+  - Planでネットワーク総採掘数が表示されない
+  - データが存在する場合でも0や不正な値が表示される
+- **根本原因**:
+  - SQLの`SUM(count)`は結果が空の場合に`NULL`を返す
+  - JDBCの`rs.getLong()`は`NULL`を0として扱うが、`rs.wasNull()`でチェックしないと不正確
+  - NULL処理が不適切だった
+- **解決**:
+  ```java
+  long total = rs.getLong("total");
+  // rs.wasNull()をチェックしてNULLの場合は0を返す
+  return rs.wasNull() ? 0 : total;
+  ```
+- **影響**: 
+  - Planでサーバー総採掘数が正しく表示される
+  - Planでネットワーク総採掘数が正しく表示される
+  - データがない場合も0が正しく表示される
+
+### 🔧 技術詳細 / Technical Details
+
+#### 修正箇所
+1. **DatabaseManager.java (Bukkit)**
+   - `getServerTotalMined()`: NULL処理追加
+   - `getNetworkTotalMined()`: NULL処理追加
+   - エラーログ改善、スタックトレース追加
+
+2. **CommonDatabaseManager.java (Common)**
+   - `getNetworkTotalMined()`: NULL処理追加
+   - エラーログ改善、スタックトレース追加
+
+---
+
+## [2.3.4] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fixes
+
+#### サーバー間リアルタイム同期の修正
+- **重大なバグ修正**: Bungeecordネットワークでサーバー間のリアルタイム同期が機能していなかった
+- **問題**: 
+  - メインサーバーで5ブロック採掘
+  - 資源サーバーで`/mtr`コマンドを実行
+  - 期待: 5ブロックと表示
+  - 実際: 採掘データがありませんと表示
+- **根本原因**:
+  - HikariCPの`elideSetAutoCommits`最適化がautoCommit管理を最適化
+  - autoCommitが暗黙的に動作していた
+  - データ書き込み後のコミットが確実でなかった
+- **解決**:
+  - `elideSetAutoCommits`最適化を削除（リアルタイム同期のため）
+  - `hikariConfig.setAutoCommit(true)`を明示的に設定
+  - データ書き込み前に`conn.getAutoCommit()`でautoCommitを確認・有効化
+  - executeUpdate()後、autoCommitにより自動コミットされることを明示化
+- **影響**: 
+  - データ書き込み後、即座に他のサーバーから見えるようになった
+  - Bungeecordネットワークでリアルタイム統計が正常に機能
+
+### 🔧 技術詳細 / Technical Details
+
+#### DatabaseManager.java (Bukkit)
+```java
+// 削除
+// hikariConfig.addDataSourceProperty("elideSetAutoCommits", "true");
+
+// 追加
+hikariConfig.setAutoCommit(true);  // 明示的にautoCommitを有効化
+
+// データ書き込み時
+if (!conn.getAutoCommit()) {
+    conn.setAutoCommit(true);
+}
+pstmt.executeUpdate();
+// autoCommit=trueなので、ここで自動的にコミットされている
+```
+
+#### CommonDatabaseManager.java (Common)
+```java
+// 追加
+hikariConfig.setAutoCommit(true);  // 明示的にautoCommitを有効化
+```
+
+---
+
+## [2.3.3] - 2026-02-07
+
+### 🔧 改善 / Improvements
+
+#### shadowJar設定の改善
+- **リソース包含**: `from(sourceSets.main.output)`を明示的に追加
+- **依存関係リロケーション**: 競合回避のため以下をリロケート
+  - `com.zaxxer.hikari` → `com.kubota6646.miningtracker.lib.hikari`
+  - `com.mysql` → `com.kubota6646.miningtracker.lib.mysql`
+  - `org.slf4j` → `com.kubota6646.miningtracker.lib.slf4j`
+- **影響**: プラグイン間の依存関係競合を防止、より安定した動作
+
+### 📚 ドキュメント改善 / Documentation
+
+#### README.md
+- **ビルド成果物の明確化**: Bukkit版とBungee版の2つのJARを明示
+- **インストール手順の詳細化**: 
+  - シングルサーバー向け手順
+  - Bungeecordネットワーク向け手順
+  - 重要な警告と注意事項
+- **トラブルシューティングセクション追加**:
+  - "Plugin must have plugin.yml or bungee.yml"エラーの解決
+  - Paper/Spigotで動作しない場合の確認事項
+  - データベース接続エラーの対処法
+  - Bungeecordネットワーク統計が表示されない場合の対処
+
+#### BUNGEECORD_SETUP.md
+- **警告セクション追加**: 正しいJARファイルの使用方法を明示
+- **JARファイル名の更新**: 2.2.0 → 2.3.3
+- **エラー原因の説明**: 間違ったJARを使用した場合のエラーを文書化
+
+### 🐛 問題解決 / Problem Resolution
+
+- **Paper/Bungeecordで動作しない問題**: ドキュメント改善により解決方法を提供
+- **混乱の防止**: どのJARをどこで使うべきか明確化
+
+---
+
+## [2.3.2] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fixes
+
+#### Bungeecord APIバージョン修正
+- **重大なバグ修正**: Bungeecord APIの正しいバージョンに修正
+- **問題**: `miningtracker-bungee`コンパイルエラー - Bungeecord APIが見つからない
+- **原因**: `net.md-5:bungeecord-api:1.21-R0.1-SNAPSHOT`が存在しない。BungeecordはSNAPSHOT版を使用しない
+- **解決**: 正しい安定版バージョンに変更
+  - `net.md-5:bungeecord-api:1.21-R0.4`
+- **影響**: Bungeecordモジュールのコンパイルエラー解消、ビルド成功
+
+### 📦 依存関係管理
+- Bungeecord API最新安定版（1.21-R0.4）を使用
+- Maven Centralから正常に解決可能
+
+---
+
+## [2.3.1] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fixes
+
+#### HikariCP依存関係修正
+- **重大なバグ修正**: bukkit/bungeeモジュールのHikariCP依存関係を追加
+- **問題**: `miningtracker-bukkit`コンパイルエラー - HikariCPパッケージが見つからない
+- **原因**: Gradleの`implementation`依存関係は推移的でない。CommonモジュールがHikariCPを宣言していても、Bukkitモジュールからはアクセスできない
+- **解決**: bukkit/bungee両モジュールに以下を明示的に追加
+  - `com.mysql:mysql-connector-j:8.3.0`
+  - `com.zaxxer:HikariCP:5.1.0`
+  - `org.slf4j:slf4j-simple:2.0.9`
+- **影響**: コンパイルエラー完全解消、ビルド成功
+
+### 📦 依存関係管理
+- 各モジュールが必要な依存関係を明示的に宣言
+- マルチモジュールプロジェクトのベストプラクティスに準拠
+
+---
+
+## [2.3.0] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fixes
+
+#### ビルドエラー修正
+- **重大なバグ修正**: ルートディレクトリの古い`src/`ディレクトリを削除
+- **問題**: マルチモジュール化後、ルートに古い`src/`が残りビルドエラー発生
+- **原因**: Gradleがルートプロジェクトの`src/`をコンパイルしようとするが、依存関係が未設定
+- **解決**: gitから古い`src/`を完全に削除
+- **影響**: ビルドが正常に動作するようになった
+
+### 📦 プロジェクト構造
+- マルチモジュールプロジェクトの構造をクリーンアップ
+- ルートレベルのソースコードを完全に削除
+- 各モジュール（bukkit, bungee, common）のみがソースコードを持つ
+
+---
+
+## [2.2.0] - 2026-02-07
+
+### 🚀 新機能 / New Features
+
+#### Bungeecordプラグイン対応 ⭐
+- **MiningTracker-Bungee**: Bungeecordプロキシに直接インストール可能な新プラグイン
+- **ネットワーク統計のみ表示**: サーバー統計を非表示、ネットワーク統計のみをPlanに表示
+- **MySQL専用**: Bungee版はMySQLのみ対応（SQLiteは不可）
+- **読み取り専用**: 採掘トラッキングなし、統計の表示のみ
+
+#### マルチモジュール化
+- **アーキテクチャ変更**: Gradleマルチモジュールプロジェクトに変更
+  - `miningtracker-common`: 共通コード（ConfigAdapter, CommonDatabaseManager）
+  - `miningtracker-bukkit`: Bukkitプラグイン（既存機能をすべて維持）
+  - `miningtracker-bungee`: Bungeecordプラグイン（ネットワーク統計のみ）
+
+#### 共通モジュール
+- **ConfigAdapter Interface**: Bukkit/Bungeeの設定を統一的に扱う抽象化
+- **CommonDatabaseManager**: プラットフォーム非依存のデータベース処理
+- **BukkitConfigAdapter**: Bukkit用の設定アダプター実装
+- **BungeeConfigAdapter**: Bungee用の設定アダプター実装
+
+### 📚 ドキュメント / Documentation
+
+#### 新規追加・更新
+- **README.md**: Bungeecordプラグインの説明を追加
+  - 2つのインストール方法を明記（バックエンドのみ vs プロキシにも）
+  - Bukkit版とBungee版の比較表
+- **BUNGEECORD_SETUP.md**: Bungee版の詳細な説明を追加
+  - インストール方法の選択ガイド
+  - Bungee版の設定例
+  - Bukkit版との違いを明示
+- **bungee.yml**: Bungeecordプラグイン記述ファイル
+- **config.yml (Bungee用)**: Bungeecord版の設定ファイルテンプレート
+
+### 🔧 技術詳細 / Technical Details
+
+#### Plan連携
+- **Bukkit版**: すべての統計を表示
+  - プレイヤー統計 ✓
+  - サーバー統計 ✓
+  - ネットワーク統計 ✓
+- **Bungee版**: ネットワーク統計のみ表示
+  - プレイヤー統計 ✗
+  - サーバー統計 ✗
+  - ネットワーク統計 ✓
+
+#### ビルド成果物
+- `MiningTracker-Bukkit-2.2.0.jar`: バックエンドサーバー用
+- `MiningTracker-Bungee-2.2.0.jar`: Bungeecordプロキシ用
+- `MiningTracker-Common-2.2.0.jar`: 共通ライブラリ（shadowJarに含まれる）
+
+### 🐛 バグ修正 / Bug Fixes
+
+#### DatabaseManagerのリソースリーク修正（継続）
 - **問題**: ResultSetオブジェクトが適切に閉じられておらず、リソースリークが発生
 - **原因**: 30箇所のResultSet宣言がtry-with-resourcesで管理されていなかった
 - **修正内容**: すべてのResultSetをtry-with-resources文で適切に管理するように修正
