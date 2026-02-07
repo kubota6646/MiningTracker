@@ -80,26 +80,28 @@ public class MinecraftStatsImporter {
                 return false;
             }
             
-            // データベースにインポート
+            // データベースに一括インポート（バッチ処理）
             int importedBlocks = 0;
-            int failedBlocks = 0;
-            for (Map.Entry<Material, Integer> entry : miningData.entrySet()) {
-                try {
-                    if (forceOverwrite) {
-                        // 上書きモード: 既存データを統計の値で置き換え
-                        plugin.getDatabaseManager().setMiningCount(playerUUID, playerName, entry.getKey(), entry.getValue());
-                    } else {
-                        // 追加モード: 既存データに統計の値を加算
+            
+            if (forceOverwrite) {
+                // バッチ処理を使用して一括で上書き
+                importedBlocks = plugin.getDatabaseManager().setBatchMiningCount(playerUUID, playerName, miningData);
+            } else {
+                // 追加モードの場合は個別に処理（既存の動作を維持）
+                int failedBlocks = 0;
+                for (Map.Entry<Material, Integer> entry : miningData.entrySet()) {
+                    try {
                         plugin.getDatabaseManager().addMiningCount(playerUUID, playerName, entry.getKey(), entry.getValue());
+                        importedBlocks++;
+                    } catch (Exception e) {
+                        plugin.getLogger().warning("Failed to import block " + entry.getKey() + ": " + e.getMessage());
+                        failedBlocks++;
                     }
-                    importedBlocks++;
-                } catch (Exception e) {
-                    plugin.getLogger().warning("Failed to import block " + entry.getKey() + ": " + e.getMessage());
-                    failedBlocks++;
                 }
+                plugin.getLogger().info("Import summary (add mode) - Success: " + importedBlocks + ", Failed: " + failedBlocks);
             }
             
-            plugin.getLogger().info("Import summary - Success: " + importedBlocks + ", Failed: " + failedBlocks);
+            plugin.getLogger().info("Import summary - Successfully imported: " + importedBlocks + " blocks");
             
             if (forceOverwrite) {
                 plugin.getLogger().info(String.format(

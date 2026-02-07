@@ -490,6 +490,141 @@ public class DatabaseManager {
         }
     }
     
+    /**
+     * 複数のブロックの採掘数を一括で設定（バッチ処理で効率化）
+     * @param playerUUID プレイヤーUUID
+     * @param playerName プレイヤー名
+     * @param miningData ブロックと採掘数のマップ
+     * @return 成功した件数
+     */
+    public int setBatchMiningCount(UUID playerUUID, String playerName, Map<Material, Integer> miningData) {
+        String dbType = plugin.getConfig().getString("database.type", "sqlite");
+        String serverName = plugin.getConfig().getString("server-name", "default");
+        String sql;
+        
+        plugin.getLogger().info("setBatchMiningCount called - Player: " + playerName + ", Blocks: " + miningData.size() + ", DB: " + dbType);
+        
+        if (dbType.equalsIgnoreCase("mysql")) {
+            sql = "INSERT INTO mining_data (player_uuid, player_name, block_type, server_name, count) " +
+                  "VALUES (?, ?, ?, ?, ?) " +
+                  "ON DUPLICATE KEY UPDATE count = ?, player_name = ?";
+        } else {
+            sql = "INSERT INTO mining_data (player_uuid, player_name, block_type, server_name, count) " +
+                  "VALUES (?, ?, ?, ?, ?) " +
+                  "ON CONFLICT(player_uuid, block_type, server_name) " +
+                  "DO UPDATE SET count = ?, player_name = ?";
+        }
+        
+        int successCount = 0;
+        
+        if (dbType.equalsIgnoreCase("mysql")) {
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+            try {
+                conn = getMySQLConnection();
+                conn.setAutoCommit(false); // トランザクション開始
+                plugin.getLogger().info("MySQL transaction started, autoCommit=false");
+                
+                pstmt = conn.prepareStatement(sql);
+                
+                for (Map.Entry<Material, Integer> entry : miningData.entrySet()) {
+                    pstmt.setString(1, playerUUID.toString());
+                    pstmt.setString(2, playerName);
+                    pstmt.setString(3, entry.getKey().name());
+                    pstmt.setString(4, serverName);
+                    pstmt.setInt(5, entry.getValue());
+                    pstmt.setInt(6, entry.getValue());
+                    pstmt.setString(7, playerName);
+                    pstmt.addBatch();
+                    successCount++;
+                }
+                
+                plugin.getLogger().info("Executing batch for " + successCount + " blocks...");
+                int[] results = pstmt.executeBatch();
+                plugin.getLogger().info("Batch executed, affected rows: " + results.length);
+                
+                conn.commit(); // 一括コミット
+                plugin.getLogger().info("MySQL transaction committed successfully!");
+                
+            } catch (SQLException e) {
+                plugin.getLogger().severe("バッチインポートエラー (MySQL): " + e.getMessage());
+                e.printStackTrace();
+                
+                // ロールバック処理
+                if (conn != null) {
+                    try {
+                        plugin.getLogger().warning("Rolling back transaction...");
+                        conn.rollback();
+                        plugin.getLogger().warning("Transaction rolled back");
+                    } catch (SQLException ex) {
+                        plugin.getLogger().severe("ロールバックエラー: " + ex.getMessage());
+                    }
+                }
+                successCount = 0;
+            } finally {
+                // リソースのクリーンアップ
+                if (pstmt != null) {
+                    try {
+                        pstmt.close();
+                    } catch (SQLException e) {
+                        plugin.getLogger().warning("PreparedStatement close error: " + e.getMessage());
+                    }
+                }
+                if (conn != null) {
+                    try {
+                        conn.setAutoCommit(true); // autoCommitを元に戻す
+                        conn.close(); // HikariCPにコネクションを返却
+                        plugin.getLogger().info("Connection returned to pool");
+                    } catch (SQLException e) {
+                        plugin.getLogger().warning("Connection close error: " + e.getMessage());
+                    }
+                }
+            }
+            
+        } else {
+            // SQLite処理（既存のコード）
+            try {
+                Connection conn = getSQLiteConnection();
+                conn.setAutoCommit(false); // トランザクション開始
+                plugin.getLogger().info("SQLite transaction started, autoCommit=false");
+                
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    for (Map.Entry<Material, Integer> entry : miningData.entrySet()) {
+                        pstmt.setString(1, playerUUID.toString());
+                        pstmt.setString(2, playerName);
+                        pstmt.setString(3, entry.getKey().name());
+                        pstmt.setString(4, serverName);
+                        pstmt.setInt(5, entry.getValue());
+                        pstmt.setInt(6, entry.getValue());
+                        pstmt.setString(7, playerName);
+                        pstmt.addBatch();
+                        successCount++;
+                    }
+                    
+                    plugin.getLogger().info("Executing batch for " + successCount + " blocks...");
+                    int[] results = pstmt.executeBatch();
+                    plugin.getLogger().info("Batch executed, affected rows: " + results.length);
+                    
+                    conn.commit(); // 一括コミット
+                    conn.setAutoCommit(true); // autoCommitを戻す
+                    plugin.getLogger().info("SQLite transaction committed successfully!");
+                    
+                } catch (SQLException e) {
+                    conn.rollback(); // エラー時はロールバック
+                    conn.setAutoCommit(true); // autoCommitを戻す
+                    throw e;
+                }
+            } catch (SQLException e) {
+                plugin.getLogger().severe("バッチインポートエラー (SQLite): " + e.getMessage());
+                e.printStackTrace();
+                successCount = 0;
+            }
+        }
+        
+        plugin.getLogger().info("setBatchMiningCount completed - Success count: " + successCount);
+        return successCount;
+    }
+    
     public Map<Material, Integer> getPlayerStats(UUID playerUUID) {
         Map<Material, Integer> stats = new HashMap<>();
         String sql = "SELECT block_type, count FROM mining_data WHERE player_uuid = ?";
