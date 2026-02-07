@@ -125,7 +125,7 @@ public class CommonDatabaseManager {
     // Plan統計用メソッド
     
     public long getNetworkTotalMined() {
-        String sql = "SELECT SUM(count) FROM mt_mining_data";
+        String sql = "SELECT SUM(count) FROM mining_data";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -139,7 +139,7 @@ public class CommonDatabaseManager {
     }
     
     public long getNetworkPlayerCount() {
-        String sql = "SELECT COUNT(DISTINCT player_uuid) FROM mt_mining_data";
+        String sql = "SELECT COUNT(DISTINCT player_uuid) FROM mining_data";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -153,7 +153,7 @@ public class CommonDatabaseManager {
     }
     
     public List<Map.Entry<String, Long>> getTopPlayersAllServers(int limit) {
-        String sql = "SELECT player_name, SUM(count) as total FROM mt_mining_data " +
+        String sql = "SELECT player_name, SUM(count) as total FROM mining_data " +
                      "GROUP BY player_uuid, player_name ORDER BY total DESC LIMIT ?";
         List<Map.Entry<String, Long>> result = new ArrayList<>();
         try (Connection conn = getConnection();
@@ -172,7 +172,7 @@ public class CommonDatabaseManager {
     
     public Map<String, Map<String, Long>> getAllServerStats() {
         String sql = "SELECT server_name, COUNT(DISTINCT player_uuid) as playerCount, " +
-                     "SUM(count) as totalBlocks FROM mt_mining_data " +
+                     "SUM(count) as totalBlocks FROM mining_data " +
                      "GROUP BY server_name";
         Map<String, Map<String, Long>> result = new HashMap<>();
         try (Connection conn = getConnection();
