@@ -1,5 +1,34 @@
 # 変更履歴 / Changelog
 
+## [2.3.6] - 2026-02-07
+
+### 🔧 ビルドエラー修正 / Build Fix
+
+#### shadowJar Java 21互換性問題解消
+- **ビルドエラー修正**: shadowJarタスクの「Unsupported class file major version 65」エラー解消
+- **問題**:
+  ```
+  org.gradle.api.GradleException: Could not add file to ZIP
+  Caused by: java.lang.IllegalArgumentException: Unsupported class file major version 65
+  ```
+- **根本原因**:
+  - Java 21でコンパイル（class file version 65）
+  - Shadow plugin 8.1.1のASMライブラリがJava 21バイトコードを完全にサポートしていない
+  - shadowJarタスクがバイトコード処理に失敗
+- **解決**:
+  - **Shadow plugin更新**: 8.1.1 → 8.1.7
+    - Java 21完全サポート
+    - ASMライブラリ最新化
+    - 多数のバグ修正
+  - **Gradle更新**: 8.5 → 8.9
+    - Java 21サポート改善
+    - パフォーマンス向上
+    - セキュリティ修正
+- **影響**: 
+  - shadowJarがJava 21バイトコードを正常に処理
+  - ビルドが成功し、JARファイルが生成される
+  - 安定したビルドプロセス
+
 ## [2.3.5] - 2026-02-07
 
 ### 🐛 バグ修正 / Bug Fixes
