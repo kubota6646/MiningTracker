@@ -1,5 +1,25 @@
 # 変更履歴 / Changelog
 
+## [2.3.1] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fixes
+
+#### HikariCP依存関係修正
+- **重大なバグ修正**: bukkit/bungeeモジュールのHikariCP依存関係を追加
+- **問題**: `miningtracker-bukkit`コンパイルエラー - HikariCPパッケージが見つからない
+- **原因**: Gradleの`implementation`依存関係は推移的でない。CommonモジュールがHikariCPを宣言していても、Bukkitモジュールからはアクセスできない
+- **解決**: bukkit/bungee両モジュールに以下を明示的に追加
+  - `com.mysql:mysql-connector-j:8.3.0`
+  - `com.zaxxer:HikariCP:5.1.0`
+  - `org.slf4j:slf4j-simple:2.0.9`
+- **影響**: コンパイルエラー完全解消、ビルド成功
+
+### 📦 依存関係管理
+- 各モジュールが必要な依存関係を明示的に宣言
+- マルチモジュールプロジェクトのベストプラクティスに準拠
+
+---
+
 ## [2.3.0] - 2026-02-07
 
 ### 🐛 バグ修正 / Bug Fixes
