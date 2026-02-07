@@ -1,5 +1,21 @@
 # Bungeecord ネットワーク構成ガイド
 
+## ⚠️ 重要: 正しいJARファイルの使用
+
+**2種類のJARファイルがあります：**
+
+| 用途 | JARファイル | インストール場所 |
+|------|-----------|---------------|
+| **Bukkit/Paper サーバー** | `MiningTracker-Bukkit-2.3.2.jar` | 各バックエンドサーバー |
+| **Bungeecord プロキシ** | `MiningTracker-Bungee-2.3.2.jar` | Bungeecordプロキシ |
+
+❌ **間違った使用例:**
+- Bungeecordに`MiningTracker-Bukkit-2.3.2.jar`を使用 → エラー発生
+- Bukkitサーバーに`MiningTracker-Bungee-2.3.2.jar`を使用 → 動作しない
+
+✅ **正しい使用:**
+- 各プラットフォーム専用のJARを使用してください
+
 ## 概要
 
 MiningTracker v2.2.0以降、Bungeecordネットワーク環境で動作し、Plan Player Analyticsのネットワークページに採掘統計を表示できます。
@@ -187,16 +203,18 @@ Webserver:
 #### 各バックエンドサーバーのみ
 
 ```bash
-# MiningTrackerをダウンロード
+# MiningTracker-Bukkitをダウンロード
 # https://github.com/kubota6646/MiningTracker/releases
 
 # 各バックエンドサーバーのpluginsフォルダに配置
-cp MiningTracker-2.2.0.jar /path/to/server1/plugins/
-cp MiningTracker-2.2.0.jar /path/to/server2/plugins/
-cp MiningTracker-2.2.0.jar /path/to/server3/plugins/
+cp MiningTracker-Bukkit-2.3.2.jar /path/to/server1/plugins/
+cp MiningTracker-Bukkit-2.3.2.jar /path/to/server2/plugins/
+cp MiningTracker-Bukkit-2.3.2.jar /path/to/server3/plugins/
 ```
 
-**重要**: MiningTrackerはBungeecordプロキシには不要です。
+⚠️ **重要**: 必ず**`MiningTracker-Bukkit-2.3.2.jar`**を使用してください。
+- ❌ `MiningTracker-Bungee-2.3.2.jar`をBukkitサーバーで使用しない
+- ✅ Bukkit/Paperサーバーには必ずBukkit版を使用
 
 #### MiningTrackerの設定
 
@@ -284,8 +302,14 @@ Bungeecordプロキシにもインストールして、**ネットワーク統�
 # https://github.com/kubota6646/MiningTracker/releases
 
 # Bungeecordのpluginsフォルダに配置
-cp MiningTracker-Bungee-2.2.0.jar /path/to/bungeecord/plugins/
+cp MiningTracker-Bungee-2.3.2.jar /path/to/bungeecord/plugins/
 ```
+
+⚠️ **重要**: Bungeecordプロキシには**`MiningTracker-Bungee-2.3.2.jar`**を使用してください。
+- ❌ `MiningTracker-Bukkit-2.3.2.jar`をBungeecordで使用しない
+- ✅ Bungeecordには必ずBungee版を使用
+
+エラー「Plugin must have a plugin.yml or bungee.yml」が発生する場合は、間違ったJARファイルを使用しています。
 
 **Bungeecord** の `plugins/MiningTracker/config.yml`：
 ```yaml

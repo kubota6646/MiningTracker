@@ -1,5 +1,43 @@
 # 変更履歴 / Changelog
 
+## [2.3.3] - 2026-02-07
+
+### 🔧 改善 / Improvements
+
+#### shadowJar設定の改善
+- **リソース包含**: `from(sourceSets.main.output)`を明示的に追加
+- **依存関係リロケーション**: 競合回避のため以下をリロケート
+  - `com.zaxxer.hikari` → `com.kubota6646.miningtracker.lib.hikari`
+  - `com.mysql` → `com.kubota6646.miningtracker.lib.mysql`
+  - `org.slf4j` → `com.kubota6646.miningtracker.lib.slf4j`
+- **影響**: プラグイン間の依存関係競合を防止、より安定した動作
+
+### 📚 ドキュメント改善 / Documentation
+
+#### README.md
+- **ビルド成果物の明確化**: Bukkit版とBungee版の2つのJARを明示
+- **インストール手順の詳細化**: 
+  - シングルサーバー向け手順
+  - Bungeecordネットワーク向け手順
+  - 重要な警告と注意事項
+- **トラブルシューティングセクション追加**:
+  - "Plugin must have plugin.yml or bungee.yml"エラーの解決
+  - Paper/Spigotで動作しない場合の確認事項
+  - データベース接続エラーの対処法
+  - Bungeecordネットワーク統計が表示されない場合の対処
+
+#### BUNGEECORD_SETUP.md
+- **警告セクション追加**: 正しいJARファイルの使用方法を明示
+- **JARファイル名の更新**: 2.2.0 → 2.3.3
+- **エラー原因の説明**: 間違ったJARを使用した場合のエラーを文書化
+
+### 🐛 問題解決 / Problem Resolution
+
+- **Paper/Bungeecordで動作しない問題**: ドキュメント改善により解決方法を提供
+- **混乱の防止**: どのJARをどこで使うべきか明確化
+
+---
+
 ## [2.3.2] - 2026-02-07
 
 ### 🐛 バグ修正 / Bug Fixes

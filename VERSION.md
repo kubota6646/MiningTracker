@@ -2,9 +2,16 @@
 
 ## 現在のバージョン
 
-**v2.3.2** (2026-02-07)
+**v2.3.3** (2026-02-07)
 
 ## バージョン履歴
+
+### v2.3.3 - shadowJar設定修正とドキュメント改善 (2026-02-07)
+- **重大な改善**: shadowJar設定を改善してリソースを明示的に包含
+- **ドキュメント**: README/BUNGEECORD_SETUPに詳細なトラブルシューティングを追加
+- **明確化**: Bukkit版とBungee版の使い分けを明確に説明
+- **依存関係リロケーション**: HikariCP, MySQL Connector, SLF4Jをリロケートして競合を回避
+- **問題解決**: "Plugin must have plugin.yml or bungee.yml"エラーの原因と解決方法を文書化
 
 ### v2.3.2 - Bungeecord API バージョン修正 (2026-02-07)
 - **重大なバグ修正**: Bungeecord APIバージョンを正しいものに修正
