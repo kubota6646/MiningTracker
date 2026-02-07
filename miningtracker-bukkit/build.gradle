@@ -14,8 +14,16 @@ shadowJar {
     archiveClassifier.set('')
     archiveVersion.set(version)
     
-    // Include common module
+    // Include common module and dependencies
     configurations = [project.configurations.runtimeClasspath]
+    
+    // Ensure resources are included
+    from(sourceSets.main.output)
+    
+    // Relocate dependencies to avoid conflicts
+    relocate 'com.zaxxer.hikari', 'com.kubota6646.miningtracker.lib.hikari'
+    relocate 'com.mysql', 'com.kubota6646.miningtracker.lib.mysql'
+    relocate 'org.slf4j', 'com.kubota6646.miningtracker.lib.slf4j'
 }
 
 processResources {

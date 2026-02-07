@@ -60,13 +60,44 @@ MiningTrackerは、各プレイヤーがどのブロックをどれだけ採掘�
 gradle build
 ```
 
-ビルドが成功すると、`build/libs/MiningTracker-1.0.0.jar`が生成されます。
+ビルドが成功すると、以下のJARファイルが生成されます：
+- **Bukkit/Paper用**: `miningtracker-bukkit/build/libs/MiningTracker-Bukkit-2.3.2.jar`
+- **Bungeecord用**: `miningtracker-bungee/build/libs/MiningTracker-Bungee-2.3.2.jar`
+
+⚠️ **重要**: 2つの異なるJARファイルがあります。用途に応じて正しいものを使用してください！
 
 ## インストール
 
-1. ビルドされたJARファイルをサーバーの`plugins`フォルダにコピー
+### シングルサーバー（Bukkit/Paper）
+
+1. **`MiningTracker-Bukkit-2.3.2.jar`**をサーバーの`plugins`フォルダにコピー
 2. サーバーを再起動
 3. `plugins/MiningTracker`フォルダに設定ファイルが自動生成されます
+
+### Bungeecordネットワーク
+
+#### バックエンドサーバー（推奨）
+各バックエンドサーバーに**`MiningTracker-Bukkit-2.3.2.jar`**をインストール：
+```bash
+# Survival サーバー
+cp MiningTracker-Bukkit-2.3.2.jar /path/to/survival/plugins/
+
+# Creative サーバー
+cp MiningTracker-Bukkit-2.3.2.jar /path/to/creative/plugins/
+```
+
+#### Bungeecordプロキシ（オプション）
+ネットワーク統計のみ表示する場合、**`MiningTracker-Bungee-2.3.2.jar`**をプロキシにインストール：
+```bash
+cp MiningTracker-Bungee-2.3.2.jar /path/to/bungeecord/plugins/
+```
+
+⚠️ **注意**:
+- Bungeecord版は**MySQLのみ**対応（SQLite不可）
+- Bukkitサーバーには**Bukkit版**を、Bungeecordには**Bungee版**を使用してください
+- 間違ったJARを使用すると「plugin.yml or bungee.yml not found」エラーが発生します
+
+詳細は[BUNGEECORD_SETUP.md](BUNGEECORD_SETUP.md)を参照してください。
 
 ## コマンド
 
@@ -427,3 +458,65 @@ cd MiningTracker
 ## サポート
 
 問題が発生した場合は、GitHubのIssuesページで報告してください。
+
+## トラブルシューティング
+
+### エラー: "Plugin must have a plugin.yml or bungee.yml"
+
+**症状**: Bungeecordでプラグインを読み込む際にエラーが発生
+
+**原因**: 間違ったJARファイルを使用している
+
+**解決方法**:
+- ✅ Bungeecordには**`MiningTracker-Bungee-2.3.2.jar`**を使用
+- ❌ `MiningTracker-Bukkit-2.3.2.jar`をBungeecordで使用しないこと
+
+### Paper/Spigotサーバーで動作しない
+
+**確認事項**:
+1. **正しいJARファイルを使用しているか**
+   - Bukkit/Paperサーバーには`MiningTracker-Bukkit-2.3.2.jar`を使用
+   - Bungeecord版（`MiningTracker-Bungee-2.3.2.jar`）をBukkitサーバーで使用しないこと
+
+2. **Java 21を使用しているか**
+   ```bash
+   java -version
+   # java version "21.0.x" と表示されることを確認
+   ```
+
+3. **Minecraft バージョンが1.21.xか**
+   - このプラグインは1.21.x専用です
+
+4. **プラグインが正常に読み込まれているか**
+   ```
+   /plugins
+   ```
+   コマンドでMiningTrackerが緑色で表示されることを確認
+
+5. **エラーログを確認**
+   - `logs/latest.log`でエラーメッセージを確認
+   - データベース接続エラーがないか確認
+
+### データベース接続エラー
+
+**MySQL接続エラー**:
+1. MySQLサーバーが起動しているか確認
+2. `config.yml`の接続情報が正しいか確認
+3. ユーザーに適切な権限があるか確認
+
+**SQLite読み書きエラー**:
+1. プラグインフォルダに書き込み権限があるか確認
+2. ディスク容量が十分にあるか確認
+
+### Bungeecordネットワークで統計が表示されない
+
+1. **全サーバーで同じMySQLデータベースを使用しているか**
+   - 各サーバーの`config.yml`で同じデータベース接続情報を設定
+
+2. **各サーバーで異なる`server-name`を設定しているか**
+   ```yaml
+   server-name: "survival"  # サーバーごとに異なる名前
+   ```
+
+3. **Plan Player Analyticsがインストールされているか**
+   - Bungeecord + 全バックエンドサーバーにPlanが必要
