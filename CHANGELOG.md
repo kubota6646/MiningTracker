@@ -1,6 +1,28 @@
 # 変更履歴 / Changelog
 
-## [2.2.0] - 2026-02-03
+## [2.2.0] - 2026-02-07
+
+### 🚀 新機能 / New Features
+
+#### Bungeecord/Velocityネットワーク対応
+- **Bungeecord対応**: Bungeecord/Velocityネットワーク環境での動作を正式サポート
+- **ネットワーク統計**: 複数のバックエンドサーバーからデータを自動集約
+- **Plan連携**: Planネットワークページに採掘統計を表示
+- **サーバー比較**: Planのネットワークページでサーバー間の採掘量を比較可能
+- **マルチサーバー対応**: 各バックエンドサーバーで`server-name`を設定してサーバー別統計を記録
+
+### 📚 ドキュメント / Documentation
+
+#### 新規ドキュメント追加
+- **BUNGEECORD_SETUP.md**: Bungeecord環境での詳細なセットアップガイド
+  - MySQL共有データベース設定
+  - Plan Player Analytics設定方法
+  - MiningTrackerの各サーバー設定例
+  - トラブルシューティングガイド
+
+#### 既存ドキュメント更新
+- **PLAN_INTEGRATION.md**: Bungeecord対応の情報を追加
+- **README.md**: Bungeecord対応の情報を追加、主な機能セクションを更新
 
 ### 🐛 重大なバグ修正 / Critical Bug Fix
 
