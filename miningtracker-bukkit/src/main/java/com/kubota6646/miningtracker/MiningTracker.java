@@ -16,7 +16,6 @@ public class MiningTracker extends JavaPlugin {
     private DatabaseManager databaseManager;
     private MessageManager messageManager;
     private DataManager dataManager;
-    private MiningTrackerExtension planExtension;
     
     @Override
     public void onEnable() {
@@ -69,8 +68,8 @@ public class MiningTracker extends JavaPlugin {
             // Planプラグインが存在するか確認
             if (getServer().getPluginManager().getPlugin("Plan") != null) {
                 // DataExtensionを作成して登録
-                planExtension = new MiningTrackerExtension(this);
-                planExtension.register();
+                MiningTrackerExtension extension = new MiningTrackerExtension(this);
+                extension.register();
             } else {
                 getLogger().info("Plan Player Analyticsが見つかりません。通常モードで動作します。");
             }
@@ -97,9 +96,5 @@ public class MiningTracker extends JavaPlugin {
     
     public DataManager getDataManager() {
         return dataManager;
-    }
-    
-    public MiningTrackerExtension getPlanExtension() {
-        return planExtension;
     }
 }

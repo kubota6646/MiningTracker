@@ -2,9 +2,34 @@
 
 ## 現在のバージョン
 
-**v2.4.1** (2026-02-07)
+**v2.4.2** (2026-02-07)
 
 ## バージョン履歴
+
+### v2.4.2 - ビルドエラー修正（Plan API無効化メソッド削除） (2026-02-07)
+- **重大なバグ修正**: v2.4.1で追加したPlan APIキャッシュ無効化コードによるビルドエラーを修正
+- **問題**: 
+  ```
+  エラー: シンボルを見つけられません
+  extensionService.invalidate(this, playerUUID)
+  extensionService.invalidate(this)
+  ```
+- **根本原因**:
+  - Plan API 5.6には`ExtensionService.invalidate()`メソッドが存在しない
+  - v2.4.1で実装したキャッシュ無効化コードがコンパイルエラーを引き起こす
+- **解決**:
+  - MiningTrackerExtension: `invalidatePlayerCache()` と `invalidateServerCache()` メソッドを削除
+  - MiningTracker: `planExtension` フィールドと `getPlanExtension()` ゲッターを削除
+  - DataManager: Plan無効化呼び出しを削除
+  - Planの自動更新メカニズムに依存（`@InvalidateMethod`アノテーション使用）
+- **技術的詳細**:
+  - Plan DataExtensionは定期的に自動更新される
+  - `@InvalidateMethod`アノテーションで更新タイミングを指定
+  - プレイヤーログイン/ログアウト時、定期スケジュールで更新
+- **影響**: 
+  - ビルドエラーが完全に解消
+  - Planの自動更新でデータが定期的に反映される
+  - コードがシンプルで保守しやすくなった
 
 ### v2.4.1 - SQL構文エラー修正 & Planリアルタイム更新実装 (2026-02-07)
 - **重大なバグ修正**: MySQLでランク取得時のSQL構文エラーを修正
