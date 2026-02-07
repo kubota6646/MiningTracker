@@ -1,5 +1,55 @@
 # 変更履歴 / Changelog
 
+## [2.3.4] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fixes
+
+#### サーバー間リアルタイム同期の修正
+- **重大なバグ修正**: Bungeecordネットワークでサーバー間のリアルタイム同期が機能していなかった
+- **問題**: 
+  - メインサーバーで5ブロック採掘
+  - 資源サーバーで`/mtr`コマンドを実行
+  - 期待: 5ブロックと表示
+  - 実際: 採掘データがありませんと表示
+- **根本原因**:
+  - HikariCPの`elideSetAutoCommits`最適化がautoCommit管理を最適化
+  - autoCommitが暗黙的に動作していた
+  - データ書き込み後のコミットが確実でなかった
+- **解決**:
+  - `elideSetAutoCommits`最適化を削除（リアルタイム同期のため）
+  - `hikariConfig.setAutoCommit(true)`を明示的に設定
+  - データ書き込み前に`conn.getAutoCommit()`でautoCommitを確認・有効化
+  - executeUpdate()後、autoCommitにより自動コミットされることを明示化
+- **影響**: 
+  - データ書き込み後、即座に他のサーバーから見えるようになった
+  - Bungeecordネットワークでリアルタイム統計が正常に機能
+
+### 🔧 技術詳細 / Technical Details
+
+#### DatabaseManager.java (Bukkit)
+```java
+// 削除
+// hikariConfig.addDataSourceProperty("elideSetAutoCommits", "true");
+
+// 追加
+hikariConfig.setAutoCommit(true);  // 明示的にautoCommitを有効化
+
+// データ書き込み時
+if (!conn.getAutoCommit()) {
+    conn.setAutoCommit(true);
+}
+pstmt.executeUpdate();
+// autoCommit=trueなので、ここで自動的にコミットされている
+```
+
+#### CommonDatabaseManager.java (Common)
+```java
+// 追加
+hikariConfig.setAutoCommit(true);  // 明示的にautoCommitを有効化
+```
+
+---
+
 ## [2.3.3] - 2026-02-07
 
 ### 🔧 改善 / Improvements
