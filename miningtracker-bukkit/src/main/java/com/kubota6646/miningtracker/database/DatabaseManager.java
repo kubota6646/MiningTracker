@@ -417,6 +417,70 @@ public class DatabaseManager {
         }
     }
     
+    /**
+     * 指定した採掘数を設定（上書き）する（強制インポート用）
+     * @param playerUUID プレイヤーUUID
+     * @param playerName プレイヤー名
+     * @param material ブロックタイプ
+     * @param count 設定する採掘数
+     */
+    public void setMiningCount(UUID playerUUID, String playerName, Material material, int count) {
+        String dbType = plugin.getConfig().getString("database.type", "sqlite");
+        String serverName = plugin.getConfig().getString("server-name", "default");
+        String sql;
+        
+        if (dbType.equalsIgnoreCase("mysql")) {
+            // MySQL用のUPSERT構文（countを指定値で上書き）
+            sql = "INSERT INTO mining_data (player_uuid, player_name, block_type, server_name, count) " +
+                  "VALUES (?, ?, ?, ?, ?) " +
+                  "ON DUPLICATE KEY UPDATE count = ?, player_name = ?";
+        } else {
+            // SQLite用のUPSERT構文（countを指定値で上書き）
+            sql = "INSERT INTO mining_data (player_uuid, player_name, block_type, server_name, count) " +
+                  "VALUES (?, ?, ?, ?, ?) " +
+                  "ON CONFLICT(player_uuid, block_type, server_name) " +
+                  "DO UPDATE SET count = ?, player_name = ?";
+        }
+        
+        if (dbType.equalsIgnoreCase("mysql")) {
+            try (Connection conn = getMySQLConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                if (!conn.getAutoCommit()) {
+                    conn.setAutoCommit(true);
+                }
+                pstmt.setString(1, playerUUID.toString());
+                pstmt.setString(2, playerName);
+                pstmt.setString(3, material.name());
+                pstmt.setString(4, serverName);
+                pstmt.setInt(5, count);  // INSERT時の初期count値
+                pstmt.setInt(6, count);  // UPDATE時に既存countを上書きする値
+                pstmt.setString(7, playerName);
+                pstmt.executeUpdate();
+            } catch (SQLException e) {
+                plugin.getLogger().warning("採掘データの設定エラー: " + e.getMessage());
+            }
+        } else {
+            try {
+                Connection conn = getSQLiteConnection();
+                if (!conn.getAutoCommit()) {
+                    conn.setAutoCommit(true);
+                }
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setString(1, playerUUID.toString());
+                    pstmt.setString(2, playerName);
+                    pstmt.setString(3, material.name());
+                    pstmt.setString(4, serverName);
+                    pstmt.setInt(5, count);  // INSERT時の初期count値
+                    pstmt.setInt(6, count);  // UPDATE時に既存countを上書きする値
+                    pstmt.setString(7, playerName);
+                    pstmt.executeUpdate();
+                } catch (SQLException e) {
+                    plugin.getLogger().warning("採掘データの設定エラー: " + e.getMessage());
+                }
+            }
+        }
+    }
+    
     public Map<Material, Integer> getPlayerStats(UUID playerUUID) {
         Map<Material, Integer> stats = new HashMap<>();
         String sql = "SELECT block_type, count FROM mining_data WHERE player_uuid = ?";

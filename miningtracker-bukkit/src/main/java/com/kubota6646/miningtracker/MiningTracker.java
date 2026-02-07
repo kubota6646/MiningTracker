@@ -3,6 +3,7 @@ package com.kubota6646.miningtracker;
 import com.kubota6646.miningtracker.commands.StatsCommand;
 import com.kubota6646.miningtracker.commands.RankingCommand;
 import com.kubota6646.miningtracker.commands.ResetCommand;
+import com.kubota6646.miningtracker.commands.ImportCommand;
 import com.kubota6646.miningtracker.database.DatabaseManager;
 import com.kubota6646.miningtracker.listeners.BlockBreakListener;
 import com.kubota6646.miningtracker.managers.MessageManager;
@@ -46,6 +47,7 @@ public class MiningTracker extends JavaPlugin {
         getCommand("mtstats").setExecutor(new StatsCommand(this));
         getCommand("mtranking").setExecutor(new RankingCommand(this));
         getCommand("mtreset").setExecutor(new ResetCommand(this));
+        getCommand("mtimport").setExecutor(new ImportCommand(this));
         
         // Plan連携の登録
         registerPlanHook();

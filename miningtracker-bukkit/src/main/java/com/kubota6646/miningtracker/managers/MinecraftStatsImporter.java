@@ -35,8 +35,20 @@ public class MinecraftStatsImporter {
      * @return インポートに成功した場合true
      */
     public boolean importPlayerStats(UUID playerUUID, String playerName) {
-        // 設定でインポート機能が無効化されている場合はスキップ
-        if (!plugin.getConfig().getBoolean("import.enabled", true)) {
+        return importPlayerStats(playerUUID, playerName, false);
+    }
+    
+    /**
+     * プレイヤーのMinecraft統計ファイルから採掘データをインポート
+     * 
+     * @param playerUUID プレイヤーのUUID
+     * @param playerName プレイヤー名
+     * @param forceOverwrite 既存データを上書きするかどうか
+     * @return インポートに成功した場合true
+     */
+    public boolean importPlayerStats(UUID playerUUID, String playerName, boolean forceOverwrite) {
+        // 設定でインポート機能が無効化されている場合はスキップ（強制モードは除く）
+        if (!forceOverwrite && !plugin.getConfig().getBoolean("import.enabled", true)) {
             return false;
         }
         
@@ -59,14 +71,27 @@ public class MinecraftStatsImporter {
             // データベースにインポート
             int importedBlocks = 0;
             for (Map.Entry<Material, Integer> entry : miningData.entrySet()) {
-                plugin.getDatabaseManager().addMiningCount(playerUUID, playerName, entry.getKey(), entry.getValue());
+                if (forceOverwrite) {
+                    // 上書きモード: 既存データを統計の値で置き換え
+                    plugin.getDatabaseManager().setMiningCount(playerUUID, playerName, entry.getKey(), entry.getValue());
+                } else {
+                    // 追加モード: 既存データに統計の値を加算
+                    plugin.getDatabaseManager().addMiningCount(playerUUID, playerName, entry.getKey(), entry.getValue());
+                }
                 importedBlocks++;
             }
             
-            plugin.getLogger().info(String.format(
-                "プレイヤー %s の統計をインポートしました: %d種類のブロック",
-                playerName, importedBlocks
-            ));
+            if (forceOverwrite) {
+                plugin.getLogger().info(String.format(
+                    "プレイヤー %s の統計を上書きインポートしました: %d種類のブロック",
+                    playerName, importedBlocks
+                ));
+            } else {
+                plugin.getLogger().info(String.format(
+                    "プレイヤー %s の統計をインポートしました: %d種類のブロック",
+                    playerName, importedBlocks
+                ));
+            }
             
             return true;
             
