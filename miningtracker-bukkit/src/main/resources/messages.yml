@@ -33,6 +33,13 @@ reset:
   confirm: "&c本当にリセットしますか？ &e/mtreset {target} confirm"
   usage: "&c使用方法: /mtreset <プレイヤー名|all> [confirm]"
 
+# インポートメッセージ
+import:
+  success: "&aプレイヤー &e{player}&a の統計をMinecraft統計から上書きインポートしました。"
+  failed: "&cプレイヤー &e{player}&c の統計インポートに失敗しました。統計ファイルが存在しないか、データがありません。"
+  confirm: "&c本当にインポートしますか？既存データは上書きされます。 &e/mtimport {target} confirm"
+  usage: "&c使用方法: /mtimport <プレイヤー名> confirm"
+
 # データベースメッセージ
 database:
   connected: "&aデータベースに接続しました。"
@@ -48,4 +55,5 @@ tracking:
 help:
   mtstats: "&e/mtstats [プレイヤー名] &7- 採掘統計を表示"
   mtranking: "&e/mtranking [ページ] &7- 採掘ランキングを表示"
-  mtreset: "&e/mtreset <プレイヤー名|all> &7- 統計をリセット"
+  mtreset: "&e/mtreset <プレイヤー名|all> confirm &7- 統計をリセット"
+  mtimport: "&e/mtimport <プレイヤー名> confirm &7- Minecraft統計から強制インポート"

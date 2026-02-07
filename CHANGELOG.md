@@ -1,5 +1,63 @@
 # 変更履歴 / Changelog
 
+## [2.5.1] - 2026-02-07
+
+### ✨ 新機能 / New Feature
+
+#### 強制インポートコマンド (`/mtimport`)
+- **要件**: 既存データがある場合でも、Minecraft統計でデータを上書きするコマンドを追加
+- **コマンド**: `/mtimport <プレイヤー名> confirm`
+- **エイリアス**: `/mtimp`
+- **動作例**: 
+  - 統計ファイル: 50個
+  - データベース: 2個
+  - コマンド実行後: 50個（統計の値で上書き）
+- **権限**: `miningtracker.import` (デフォルト: op)
+- **実装内容**:
+  - ImportCommand: 新しいコマンドクラス（確認ステップ付き）
+  - DatabaseManager.setMiningCount(): 加算ではなく置換する新メソッド
+  - MinecraftStatsImporter: forceOverwriteフラグ対応
+- **使用ケース**:
+  - データが壊れた場合の復元
+  - 統計ファイルからの再同期
+  - 管理者によるデータ修正
+
+### 📋 技術的詳細 / Technical Details
+- 安全性確保のため確認ステップ必須
+- 非同期処理でサーバーパフォーマンスに影響なし
+- MySQL/SQLite両対応のUPSERT構文使用
+
+## [2.5.0] - 2026-02-07
+
+### ✨ 新機能 / New Feature
+
+#### Minecraft統計インポート機能
+- **要件**: 既存のデータが存在しない場合、Minecraftの内蔵統計から採掘データを自動インポート
+- **実装内容**:
+  - MinecraftStatsImporter: 新しいクラスで統計ファイルを読み込み・解析
+  - DatabaseManager: addMiningCount() にカスタム数量パラメータを追加
+  - StatsCommand: データがない場合に自動的にインポートを試行
+  - config.yml: `import.enabled` 設定オプション追加
+- **技術的詳細**:
+  - `world/stats/<uuid>.json` から `minecraft:mined` セクションを読み込み
+  - JSON解析にGson（Bukkitに同梱）を使用
+  - ブロックタイプのみフィルタリング（アイテムは除外）
+  - 非同期処理でメインスレッドをブロックしない
+  - 適切なエラーハンドリングとログ出力
+- **利点**:
+  - 新規プレイヤーが既存の採掘データを失わない
+  - バニラ統計からのスムーズな移行
+  - プレイヤーエクスペリエンスの大幅な改善
+
+### 🔧 改善 / Improvements
+
+#### コード品質向上
+- MinecraftStatsImporter: `Bukkit.getWorlds().stream().findFirst()` で IndexOutOfBoundsException を防止
+- DatabaseManager: PreparedStatement パラメータにコメント追加（INSERT/UPDATE の区別を明確化）
+
+### 📚 ドキュメント / Documentation
+- MINECRAFT_STATS_IMPORT.md: 詳細な機能説明、使用例、トラブルシューティングガイドを追加
+
 ## [2.4.2] - 2026-02-07
 
 ### 🐛 重大なバグ修正 / Critical Bug Fix

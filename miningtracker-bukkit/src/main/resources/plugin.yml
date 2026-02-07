@@ -17,9 +17,14 @@ commands:
     aliases: [mtr, mineranking]
   mtreset:
     description: 統計をリセット（管理者専用）
-    usage: /mtreset <プレイヤー名|all>
+    usage: /mtreset <プレイヤー名|all> confirm
     permission: miningtracker.reset
     aliases: [mtres]
+  mtimport:
+    description: Minecraft統計から強制的にインポート（管理者専用）
+    usage: /mtimport <プレイヤー名> confirm
+    permission: miningtracker.import
+    aliases: [mtimp]
 
 permissions:
   miningtracker.use:
@@ -27,6 +32,9 @@ permissions:
     default: true
   miningtracker.reset:
     description: 統計をリセットする権限
+    default: op
+  miningtracker.import:
+    description: 統計を強制インポートする権限
     default: op
   miningtracker.other:
     description: 他のプレイヤーの統計を閲覧

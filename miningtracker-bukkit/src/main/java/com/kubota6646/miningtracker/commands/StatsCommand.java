@@ -61,19 +61,37 @@ public class StatsCommand implements CommandExecutor {
             Map<Material, Integer> stats = plugin.getDatabaseManager().getPlayerStats(target.getUniqueId());
             int total = plugin.getDatabaseManager().getTotalMined(target.getUniqueId());
             
+            // データが存在しない場合、Minecraft統計からインポートを試みる
+            if (stats.isEmpty() && plugin.getStatsImporter() != null) {
+                boolean imported = plugin.getStatsImporter().importPlayerStats(
+                    target.getUniqueId(), 
+                    target.getName()
+                );
+                
+                // インポートが成功した場合、再度データを取得
+                if (imported) {
+                    stats = plugin.getDatabaseManager().getPlayerStats(target.getUniqueId());
+                    total = plugin.getDatabaseManager().getTotalMined(target.getUniqueId());
+                }
+            }
+            
+            // 最終的なデータ取得結果をコピー（ラムダ内で使用するためfinal化）
+            final Map<Material, Integer> finalStats = stats;
+            final int finalTotal = total;
+            
             plugin.getServer().getScheduler().runTask(plugin, () -> {
-                if (stats.isEmpty()) {
+                if (finalStats.isEmpty()) {
                     sender.sendMessage(messages.getPrefix() + 
                         messages.getMessage("plugin.player-no-data", "player", target.getName()));
                     return;
                 }
                 
                 sender.sendMessage(messages.getMessage("stats.header", "player", target.getName()));
-                sender.sendMessage(messages.getMessage("stats.total", "total", String.valueOf(total)));
+                sender.sendMessage(messages.getMessage("stats.total", "total", String.valueOf(finalTotal)));
                 sender.sendMessage(messages.getMessage("stats.top-blocks-header"));
                 
                 // トップ5ブロックを表示
-                List<Map.Entry<Material, Integer>> topBlocks = stats.entrySet().stream()
+                List<Map.Entry<Material, Integer>> topBlocks = finalStats.entrySet().stream()
                     .sorted(Map.Entry.<Material, Integer>comparingByValue().reversed())
                     .limit(5)
                     .collect(Collectors.toList());

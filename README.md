@@ -6,9 +6,46 @@
 
 Minecraft 1.21.x対応のプレイヤー採掘トラッキングプラグイン
 
+## 🚀 クイックスタート
+
+```bash
+# 1. JARファイルをダウンロード
+# MiningTracker-Bukkit-2.5.1.jar を取得
+
+# 2. pluginsフォルダにコピー
+cp MiningTracker-Bukkit-2.5.1.jar /path/to/server/plugins/
+
+# 3. サーバーを再起動
+# プラグインが自動的に設定ファイルを生成
+
+# 4. ゲーム内で統計を確認
+/mtstats
+
+# 5. ランキングを表示
+/mtranking
+```
+
+⭐ **v2.5.1の新機能**: `/mtimport` コマンドで既存データを統計ファイルから上書き可能！
+
+## 📑 目次
+
+- [バージョン情報](#バージョン情報)
+- [概要](#概要)
+- [主な機能](#主な機能)
+- [動作環境](#動作環境)
+- [ビルド方法](#ビルド方法)
+- [インストール](#インストール)
+- [コマンド](#コマンド)
+- [権限](#権限)
+- [Minecraft統計インポート機能](#minecraft統計インポート機能)
+- [使用例](#使用例)
+- [データベース](#データベース)
+- [設定](#設定)
+- [トラブルシューティング](#トラブルシューティング)
+
 ## バージョン情報
 
-- **最新バージョン**: 2.4.0
+- **最新バージョン**: 2.5.1
 - **対応Minecraft**: 1.21.x
 - **必須Java**: 21以降
 - **Bungeecord対応**: ✅ 完全対応（v2.2.0以降）
@@ -16,16 +53,24 @@ Minecraft 1.21.x対応のプレイヤー採掘トラッキングプラグイン
 - **リアルタイム同期**: ✅ 修正済み（v2.3.4以降）⭐ NEW
 - **Plan統計表示**: ✅ 修正済み（v2.3.5以降）⭐ NEW
 - **SLF4Jログ**: ✅ 完全修正（v2.3.9）⭐ NEW
+- **統計インポート**: ✅ Minecraft統計から自動インポート（v2.5.0）⭐ NEW
+- **強制インポート**: ✅ 既存データを上書きするコマンド（v2.5.1）⭐ NEW
 
 ## 概要
 
 MiningTrackerは、各プレイヤーがどのブロックをどれだけ採掘したかを記録し、ランキング形式で表示するMinecraftプラグインです。
+
+**v2.5.1の新機能**: 既存データをMinecraft統計で上書きする `/mtimport` コマンドを追加！データ修正や再同期に便利です。
+
+**v2.5.0の新機能**: Minecraft統計ファイルから採掘データを自動インポート！プラグイン導入前のデータも活用できます。
 
 **v2.2.0の新機能**: Bungeecordに直接インストールできるプラグインを追加！ネットワーク統計のみをPlanに表示します。
 
 ## 主な機能
 
 - **採掘トラッキング**: プレイヤーが破壊したブロックを自動的に記録
+- **統計インポート**: Minecraftの統計ファイルから既存データを自動インポート ⭐ NEW (v2.5.0)
+- **強制インポート**: 既存データを統計ファイルで上書き可能なコマンド ⭐ NEW (v2.5.1)
 - **統計表示**: 自分や他のプレイヤーの採掘統計をコマンドで確認
 - **ランキング表示**: 全プレイヤーの採掘量をランキング形式で表示
 - **Bungeecord対応**: 複数サーバー間でデータを統合管理、ネットワークページに表示
@@ -64,8 +109,8 @@ gradle build
 ```
 
 ビルドが成功すると、以下のJARファイルが生成されます：
-- **Bukkit/Paper用**: `miningtracker-bukkit/build/libs/MiningTracker-Bukkit-2.3.2.jar`
-- **Bungeecord用**: `miningtracker-bungee/build/libs/MiningTracker-Bungee-2.3.2.jar`
+- **Bukkit/Paper用**: `miningtracker-bukkit/build/libs/MiningTracker-Bukkit-2.5.1.jar`
+- **Bungeecord用**: `miningtracker-bungee/build/libs/MiningTracker-Bungee-2.5.1.jar`
 
 ⚠️ **重要**: 2つの異なるJARファイルがあります。用途に応じて正しいものを使用してください！
 
@@ -73,26 +118,26 @@ gradle build
 
 ### シングルサーバー（Bukkit/Paper）
 
-1. **`MiningTracker-Bukkit-2.3.2.jar`**をサーバーの`plugins`フォルダにコピー
+1. **`MiningTracker-Bukkit-2.5.1.jar`**をサーバーの`plugins`フォルダにコピー
 2. サーバーを再起動
 3. `plugins/MiningTracker`フォルダに設定ファイルが自動生成されます
 
 ### Bungeecordネットワーク
 
 #### バックエンドサーバー（推奨）
-各バックエンドサーバーに**`MiningTracker-Bukkit-2.3.2.jar`**をインストール：
+各バックエンドサーバーに**`MiningTracker-Bukkit-2.5.1.jar`**をインストール：
 ```bash
 # Survival サーバー
-cp MiningTracker-Bukkit-2.3.2.jar /path/to/survival/plugins/
+cp MiningTracker-Bukkit-2.5.1.jar /path/to/survival/plugins/
 
 # Creative サーバー
-cp MiningTracker-Bukkit-2.3.2.jar /path/to/creative/plugins/
+cp MiningTracker-Bukkit-2.5.1.jar /path/to/creative/plugins/
 ```
 
 #### Bungeecordプロキシ（オプション）
-ネットワーク統計のみ表示する場合、**`MiningTracker-Bungee-2.3.2.jar`**をプロキシにインストール：
+ネットワーク統計のみ表示する場合、**`MiningTracker-Bungee-2.5.1.jar`**をプロキシにインストール：
 ```bash
-cp MiningTracker-Bungee-2.3.2.jar /path/to/bungeecord/plugins/
+cp MiningTracker-Bungee-2.5.1.jar /path/to/bungeecord/plugins/
 ```
 
 ⚠️ **注意**:
@@ -126,6 +171,15 @@ cp MiningTracker-Bungee-2.3.2.jar /path/to/bungeecord/plugins/
 - **confirm**: リセットを確定（安全のため2段階実行）
 - **権限**: `miningtracker.reset` (デフォルト: op)
 
+### `/mtimport <プレイヤー名> [confirm]` ⭐ NEW (v2.5.1)
+- **エイリアス**: `/mtimp`
+- **説明**: Minecraft統計から強制的にインポートします（管理者専用）
+- **動作**: 既存データを統計ファイルの値で上書き
+- **例**: 統計ファイル=50、データベース=2 → 実行後 → データベース=50
+- **confirm**: インポートを確定（安全のため2段階実行）
+- **権限**: `miningtracker.import` (デフォルト: op)
+- **用途**: データ修正、統計ファイルからの再同期
+
 ## 権限
 
 | 権限 | 説明 | デフォルト |
@@ -133,6 +187,7 @@ cp MiningTracker-Bungee-2.3.2.jar /path/to/bungeecord/plugins/
 | `miningtracker.use` | プラグインの基本機能を使用 | true |
 | `miningtracker.other` | 他のプレイヤーの統計を閲覧 | true |
 | `miningtracker.reset` | 統計をリセット | op |
+| `miningtracker.import` | 統計を強制インポート（v2.5.1） | op |
 
 ## Plan Player Analytics 連携
 
@@ -263,6 +318,10 @@ tracking:
   count-creative: false     # クリエイティブモードでの採掘をカウント
   count-silk-touch: true    # シルクタッチでの採掘をカウント
 
+# Minecraft統計インポート設定
+import:
+  enabled: true             # 既存データがない場合にMinecraft統計からインポート
+
 # ランキング設定
 ranking:
   per-page: 10             # 1ページあたりの表示件数
@@ -279,7 +338,82 @@ messages:
 プラグインのすべてのメッセージをカスタマイズできます。
 カラーコードは`&`を使用します（例: `&a` = 緑、`&e` = 黄色）。
 
-## 使用例
+## Minecraft統計インポート機能
+
+**v2.5.0の新機能**: 既存のデータが存在しない場合、Minecraftの内蔵統計ファイルから採掘データを自動的にインポートできます。
+
+### 動作の仕組み
+
+1. プレイヤーが `/mtstats` コマンドを実行
+2. データベースに採掘データが存在しない場合、自動的に統計ファイルを検索
+3. `world/stats/<プレイヤーUUID>.json` から `minecraft:mined` セクションを読み込み
+4. ブロック採掘データをデータベースに一括インポート
+5. インポート後の統計を表示
+
+### 設定
+
+```yaml
+import:
+  enabled: true  # true: 自動インポート有効、false: 無効
+```
+
+### 利点
+
+- **データの引き継ぎ**: バニラの採掘統計を失わない
+- **新規プレイヤーに優しい**: 過去の採掘実績が自動的に認識される
+- **シームレスな移行**: プラグイン導入前のデータも活用
+
+詳細は [MINECRAFT_STATS_IMPORT.md](MINECRAFT_STATS_IMPORT.md) を参照してください。
+
+### 強制インポート機能 ⭐ NEW (v2.5.1)
+
+**v2.5.1の新機能**: 既存データがある場合でも、Minecraft統計でデータを上書きできます。
+
+#### コマンド
+
+```bash
+# 既存データを統計ファイルの値で上書き
+/mtimport <プレイヤー名> confirm
+
+# 例: Steveの統計を強制インポート
+/mtimport Steve confirm
+```
+
+#### 動作例
+
+**実行前**:
+```
+統計ファイル: 石 50個、ダイヤ 10個、石炭 30個
+データベース: 石 2個、ダイヤ 5個
+```
+
+**実行後**:
+```
+データベース: 石 50個、ダイヤ 10個、石炭 30個
+（統計ファイルの値で完全に上書き）
+```
+
+#### v2.5.0の自動インポートとの違い
+
+| 項目 | v2.5.0 自動インポート | v2.5.1 強制インポート |
+|------|---------------------|---------------------|
+| **実行方法** | `/mtstats` で自動 | `/mtimport` コマンド |
+| **実行条件** | データが存在しない場合のみ | いつでも実行可能 |
+| **動作** | 既存値に加算 | 既存値を置換 |
+| **権限** | 全ユーザー | 管理者のみ (op) |
+| **確認** | 不要 | 必須 (`confirm`) |
+
+#### 用途
+
+- **データ修正**: プレイヤーのデータが壊れた場合の復元
+- **再同期**: 統計ファイルからの完全な再同期が必要な場合
+- **管理者操作**: データベースとバニラ統計の不一致を修正
+
+#### 注意事項
+
+⚠️ **既存データは完全に上書きされます**。元に戻すことはできないため、実行前にバックアップを推奨します。
+
+詳細は [MINECRAFT_STATS_IMPORT.md](MINECRAFT_STATS_IMPORT.md) を参照してください。
 
 ### 自分の統計を確認
 ```
@@ -301,6 +435,11 @@ messages:
 ```
 /mtreset Steve confirm        # Steveの統計をリセット
 /mtreset all confirm          # 全プレイヤーの統計をリセット
+```
+
+### 統計を強制インポート ⭐ NEW (v2.5.1)
+```
+/mtimport Steve confirm       # Steveの統計を統計ファイルから上書き
 ```
 
 ## データベース
