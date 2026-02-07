@@ -12,17 +12,21 @@ Minecraft 1.21.x対応のプレイヤー採掘トラッキングプラグイン
 - **対応Minecraft**: 1.21.x
 - **必須Java**: 21以降
 - **Bungeecord対応**: ✅ 完全対応（v2.2.0以降）
+- **Bungeecordプラグイン**: ✅ 利用可能（v2.2.0以降）⭐ NEW
 
 ## 概要
 
 MiningTrackerは、各プレイヤーがどのブロックをどれだけ採掘したかを記録し、ランキング形式で表示するMinecraftプラグインです。
+
+**v2.2.0の新機能**: Bungeecordに直接インストールできるプラグインを追加！ネットワーク統計のみをPlanに表示します。
 
 ## 主な機能
 
 - **採掘トラッキング**: プレイヤーが破壊したブロックを自動的に記録
 - **統計表示**: 自分や他のプレイヤーの採掘統計をコマンドで確認
 - **ランキング表示**: 全プレイヤーの採掘量をランキング形式で表示
-- **Bungeecord対応**: 複数サーバー間でデータを統合管理、ネットワークページに表示 ⭐ NEW
+- **Bungeecord対応**: 複数サーバー間でデータを統合管理、ネットワークページに表示
+- **Bungeecordプラグイン**: プロキシに直接インストール可能、ネットワーク統計のみ表示 ⭐ NEW
 - **Plan連携**: Plan Player Analyticsと統合してWebダッシュボードに統計を表示
 - **データ永続化**: SQLiteまたはMySQLデータベースを使用
 - **柔軟な設定**: config.ymlで動作をカスタマイズ可能
@@ -111,17 +115,46 @@ Webダッシュボードで採掘統計を視覚的に表示できます。
 
 MiningTracker v2.2.0以降、Bungeecordネットワーク環境で完全に動作します：
 
-- **ネットワーク統計の表示**: Plan Player Analyticsのネットワークページに採掘統計が表示されます
-- **複数サーバー集約**: 全バックエンドサーバーのデータを自動的に集約
-- **サーバー間比較**: サーバーごとの採掘量を比較できます
-- **プレイヤー追跡**: プレイヤーがサーバー間を移動しても統計を正しく追跡
+#### 2つのインストール方法
+
+**方法1: バックエンドサーバーのみにインストール（推奨）**
+- 各バックエンドサーバーにMiningTracker-Bukkitをインストール
+- Plan がネットワーク統計を自動集約
+- すべての統計（プレイヤー、サーバー、ネットワーク）が表示
+
+**方法2: Bungeecordプロキシにもインストール ⭐ NEW**
+- Bungeecordプロキシに**MiningTracker-Bungee**をインストール
+- **ネットワーク統計のみ**をPlanに表示（サーバー統計は非表示）
+- プロキシレベルでのシンプルな統計表示
+
+#### インストール構成例
+
+```
+Bungeecord Proxy
+├── Plan (Bungee版)
+├── MiningTracker-Bungee.jar  ← オプション（ネットワーク統計のみ）
+└── Backend Servers
+    ├── Server 1: Plan + MiningTracker-Bukkit.jar
+    ├── Server 2: Plan + MiningTracker-Bukkit.jar
+    └── Server 3: Plan + MiningTracker-Bukkit.jar
+```
+
+#### 統計の表示内容
+
+| インストール場所 | Plan表示内容 |
+|-----------------|-------------|
+| **Bukkit サーバー** | プレイヤー統計 ✓<br>サーバー統計 ✓<br>ネットワーク統計 ✓ |
+| **Bungeecord プロキシ** | プレイヤー統計 ✗<br>サーバー統計 ✗<br>ネットワーク統計 ✓（のみ） |
+
+**重要**: Bungeecord版は**MySQLのみ**をサポートします（SQLiteは不可）
 
 #### セットアップ方法
 
 1. **MySQL**を全サーバーで共有
 2. **Plan Player Analytics**をBungeecord + 全バックエンドサーバーにインストール
-3. **MiningTracker**を全バックエンドサーバーにインストール（Bungeecordには不要）
-4. 各サーバーで異なる`server-name`を設定
+3. **オプション**: Bungeecordプロキシに**MiningTracker-Bungee.jar**をインストール
+4. **MiningTracker-Bukkit.jar**を全バックエンドサーバーにインストール
+5. 各サーバーで異なる`server-name`を設定
 
 **詳細な手順**: [BUNGEECORD_SETUP.md](BUNGEECORD_SETUP.md) を参照してください。
 

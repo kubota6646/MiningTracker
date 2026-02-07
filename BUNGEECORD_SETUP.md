@@ -4,9 +4,39 @@
 
 MiningTracker v2.2.0以降、Bungeecordネットワーク環境で動作し、Plan Player Analyticsのネットワークページに採掘統計を表示できます。
 
+**v2.2.0の新機能**: Bungeecordプロキシに直接インストールできる**MiningTracker-Bungee**プラグインを追加！
+
+## 2つのインストール方法
+
+### 方法1: バックエンドサーバーのみ（推奨）
+
+最もシンプルな構成。各バックエンドサーバーにMiningTracker-Bukkitをインストールするだけ。
+
+**メリット:**
+- すべての統計が表示される（プレイヤー、サーバー、ネットワーク）
+- Bungeecordプロキシへのインストール不要
+- 設定が簡単
+
+**デメリット:**
+- なし
+
+### 方法2: Bungeecordプロキシにも（オプション）
+
+Bungeecordプロキシに**MiningTracker-Bungee.jar**もインストールする構成。
+
+**メリット:**
+- プロキシレベルでネットワーク統計のみを表示
+- Planのネットワークページがシンプルに
+
+**デメリット:**
+- サーバー統計は表示されない（ネットワーク統計のみ）
+- 追加のインストール・設定が必要
+
+**注意**: MiningTracker-Bungeeは**MySQLのみ**対応（SQLite不可）
+
 ## Bungeecordネットワークでの動作
 
-### アーキテクチャ
+### アーキテクチャ（方法1: バックエンドのみ）
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -244,6 +274,53 @@ database:
 tracking:
   enabled: false  # ロビーでは採掘トラッキングを無効化
 ```
+
+### 3-B. MiningTracker-Bungee のインストール（オプション）⭐ NEW
+
+Bungeecordプロキシにもインストールして、**ネットワーク統計のみ**を表示したい場合：
+
+```bash
+# MiningTracker-Bungeeをダウンロード
+# https://github.com/kubota6646/MiningTracker/releases
+
+# Bungeecordのpluginsフォルダに配置
+cp MiningTracker-Bungee-2.2.0.jar /path/to/bungeecord/plugins/
+```
+
+**Bungeecord** の `plugins/MiningTracker/config.yml`：
+```yaml
+# MiningTracker Bungeecord設定ファイル
+# 注意: MySQLのみサポート（SQLiteは使用不可）
+
+database:
+  type: mysql
+  
+  mysql:
+    host: "mysql.example.com"
+    port: 3306
+    database: "minecraft_network"  # バックエンドサーバーと同じDB
+    username: "minecraft"
+    password: "secure_password"
+    pool:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+```
+
+**重要な違い:**
+
+| 項目 | Bukkit版 | Bungee版 |
+|------|---------|---------|
+| インストール場所 | バックエンドサーバー | Bungeecordプロキシ |
+| DB対応 | MySQL, SQLite | **MySQLのみ** |
+| Plan表示内容 | プレイヤー統計 ✓<br>サーバー統計 ✓<br>ネットワーク統計 ✓ | ネットワーク統計のみ ✓ |
+| コマンド | `/mtstats`, `/mtranking`等 | なし |
+| 採掘トラッキング | あり | なし（読み取りのみ） |
+
+**いつBungee版を使うか:**
+- Plan のネットワークページをシンプルに保ちたい場合
+- ネットワーク全体の統計のみを表示したい場合
+- プロキシレベルでの統計可視化が必要な場合
 
 ### 4. サーバーの起動
 
