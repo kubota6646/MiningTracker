@@ -81,13 +81,17 @@ public class ImportCommand implements CommandExecutor {
                 plugin.getLogger().info("Import result for " + player.getName() + ": " + (success ? "SUCCESS" : "FAILED"));
                 
                 plugin.getServer().getScheduler().runTask(plugin, () -> {
+                    plugin.getLogger().info("Sending chat message to " + sender.getName());
                     if (success) {
-                        sender.sendMessage(messages.getPrefix() + 
-                            messages.getMessage("import.success", "player", player.getName()));
+                        String message = messages.getPrefix() + messages.getMessage("import.success", "player", player.getName());
+                        plugin.getLogger().info("Success message: " + message);
+                        sender.sendMessage(message);
                     } else {
-                        sender.sendMessage(messages.getPrefix() + 
-                            messages.getMessage("import.failed", "player", player.getName()));
+                        String message = messages.getPrefix() + messages.getMessage("import.failed", "player", player.getName());
+                        plugin.getLogger().info("Failed message: " + message);
+                        sender.sendMessage(message);
                     }
+                    plugin.getLogger().info("Chat message sent");
                 });
             } catch (Exception e) {
                 plugin.getLogger().severe("Exception during import for " + player.getName() + ": " + e.getMessage());

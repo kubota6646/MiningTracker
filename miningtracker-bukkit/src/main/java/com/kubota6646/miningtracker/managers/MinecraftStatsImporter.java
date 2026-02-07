@@ -82,16 +82,24 @@ public class MinecraftStatsImporter {
             
             // データベースにインポート
             int importedBlocks = 0;
+            int failedBlocks = 0;
             for (Map.Entry<Material, Integer> entry : miningData.entrySet()) {
-                if (forceOverwrite) {
-                    // 上書きモード: 既存データを統計の値で置き換え
-                    plugin.getDatabaseManager().setMiningCount(playerUUID, playerName, entry.getKey(), entry.getValue());
-                } else {
-                    // 追加モード: 既存データに統計の値を加算
-                    plugin.getDatabaseManager().addMiningCount(playerUUID, playerName, entry.getKey(), entry.getValue());
+                try {
+                    if (forceOverwrite) {
+                        // 上書きモード: 既存データを統計の値で置き換え
+                        plugin.getDatabaseManager().setMiningCount(playerUUID, playerName, entry.getKey(), entry.getValue());
+                    } else {
+                        // 追加モード: 既存データに統計の値を加算
+                        plugin.getDatabaseManager().addMiningCount(playerUUID, playerName, entry.getKey(), entry.getValue());
+                    }
+                    importedBlocks++;
+                } catch (Exception e) {
+                    plugin.getLogger().warning("Failed to import block " + entry.getKey() + ": " + e.getMessage());
+                    failedBlocks++;
                 }
-                importedBlocks++;
             }
+            
+            plugin.getLogger().info("Import summary - Success: " + importedBlocks + ", Failed: " + failedBlocks);
             
             if (forceOverwrite) {
                 plugin.getLogger().info(String.format(
@@ -103,6 +111,12 @@ public class MinecraftStatsImporter {
                     "プレイヤー %s の統計をインポートしました: %d種類のブロック",
                     playerName, importedBlocks
                 ));
+            }
+            
+            // データベース操作が1つも成功しなかった場合は失敗とみなす
+            if (importedBlocks == 0) {
+                plugin.getLogger().warning("No blocks were successfully imported for " + playerName);
+                return false;
             }
             
             return true;

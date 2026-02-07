@@ -429,6 +429,8 @@ public class DatabaseManager {
         String serverName = plugin.getConfig().getString("server-name", "default");
         String sql;
         
+        plugin.getLogger().fine("setMiningCount called - Player: " + playerName + ", Material: " + material + ", Count: " + count);
+        
         if (dbType.equalsIgnoreCase("mysql")) {
             // MySQL用のUPSERT構文（countを指定値で上書き）
             sql = "INSERT INTO mining_data (player_uuid, player_name, block_type, server_name, count) " +
@@ -455,9 +457,12 @@ public class DatabaseManager {
                 pstmt.setInt(5, count);  // INSERT時の初期count値
                 pstmt.setInt(6, count);  // UPDATE時に既存countを上書きする値
                 pstmt.setString(7, playerName);
-                pstmt.executeUpdate();
+                int rowsAffected = pstmt.executeUpdate();
+                plugin.getLogger().fine("setMiningCount - MySQL rows affected: " + rowsAffected);
             } catch (SQLException e) {
-                plugin.getLogger().warning("採掘データの設定エラー: " + e.getMessage());
+                plugin.getLogger().warning("採掘データの設定エラー (MySQL): " + e.getMessage() + 
+                                         " - Player: " + playerName + ", Material: " + material);
+                e.printStackTrace();
             }
         } else {
             try {
@@ -473,10 +478,14 @@ public class DatabaseManager {
                     pstmt.setInt(5, count);  // INSERT時の初期count値
                     pstmt.setInt(6, count);  // UPDATE時に既存countを上書きする値
                     pstmt.setString(7, playerName);
-                    pstmt.executeUpdate();
+                    int rowsAffected = pstmt.executeUpdate();
+                    plugin.getLogger().fine("setMiningCount - SQLite rows affected: " + rowsAffected + 
+                                          " for " + material);
                 }
             } catch (SQLException e) {
-                plugin.getLogger().warning("採掘データの設定エラー: " + e.getMessage());
+                plugin.getLogger().warning("採掘データの設定エラー (SQLite): " + e.getMessage() + 
+                                         " - Player: " + playerName + ", Material: " + material);
+                e.printStackTrace();
             }
         }
     }
