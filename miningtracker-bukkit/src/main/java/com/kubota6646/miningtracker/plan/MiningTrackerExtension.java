@@ -63,6 +63,32 @@ public class MiningTrackerExtension implements DataExtension {
         }
     }
     
+    /**
+     * プレイヤーのPlan統計をリアルタイムで更新（キャッシュ無効化）
+     */
+    public void invalidatePlayerCache(UUID playerUUID) {
+        try {
+            ExtensionService extensionService = ExtensionService.getInstance();
+            // プレイヤー別データを無効化
+            extensionService.invalidate(this, playerUUID);
+        } catch (Exception e) {
+            // Planが無効な場合は無視
+        }
+    }
+    
+    /**
+     * サーバー統計をリアルタイムで更新（キャッシュ無効化）
+     */
+    public void invalidateServerCache() {
+        try {
+            ExtensionService extensionService = ExtensionService.getInstance();
+            // サーバー全体のデータを無効化
+            extensionService.invalidate(this);
+        } catch (Exception e) {
+            // Planが無効な場合は無視
+        }
+    }
+    
     // プレイヤー別データ
     
     @NumberProvider(

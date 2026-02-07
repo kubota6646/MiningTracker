@@ -17,6 +17,12 @@ public class DataManager {
         // 非同期でデータベースに保存
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
             plugin.getDatabaseManager().addMiningCount(playerUUID, playerName, material);
+            
+            // Planのキャッシュを無効化してリアルタイム更新
+            if (plugin.getPlanExtension() != null) {
+                plugin.getPlanExtension().invalidatePlayerCache(playerUUID);
+                plugin.getPlanExtension().invalidateServerCache();
+            }
         });
     }
     

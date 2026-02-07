@@ -616,7 +616,8 @@ public class DatabaseManager {
      */
     public long getPlayerRank(UUID playerUUID) {
         String dbType = plugin.getConfig().getString("database.type", "sqlite");
-        String sql = "SELECT COUNT(DISTINCT player_uuid) + 1 as rank " +
+        // rankはMySQLの予約語なので、player_rankに変更
+        String sql = "SELECT COUNT(DISTINCT player_uuid) + 1 as player_rank " +
                      "FROM mining_data " +
                      "WHERE player_uuid != ? " +
                      "GROUP BY player_uuid " +
@@ -630,11 +631,12 @@ public class DatabaseManager {
                 pstmt.setString(2, uuid);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getLong("rank");
+                        return rs.getLong("player_rank");
                     }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("ランク取得エラー: " + e.getMessage());
+                e.printStackTrace();
             }
         } else {
             try {
@@ -645,12 +647,13 @@ public class DatabaseManager {
                     pstmt.setString(2, uuid);
                     try (ResultSet rs = pstmt.executeQuery()) {
                         if (rs.next()) {
-                            return rs.getLong("rank");
+                            return rs.getLong("player_rank");
                         }
                     }
                 }
             } catch (SQLException e) {
                 plugin.getLogger().warning("ランク取得エラー: " + e.getMessage());
+                e.printStackTrace();
             }
         }
         return 1; // デフォルトは1位
