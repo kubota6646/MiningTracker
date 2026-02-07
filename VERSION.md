@@ -2,9 +2,22 @@
 
 ## 現在のバージョン
 
-**v2.3.7** (2026-02-07)
+**v2.3.8** (2026-02-07)
 
 ## バージョン履歴
+
+### v2.3.8 - SLF4J Provider修正 (2026-02-07)
+- **SLF4Jエラー修正**: 「SLF4J: No SLF4J providers were found」エラー解消
+- **問題**: HikariCPのログ出力時にSLF4Jプロバイダーが見つからない
+- **根本原因**:
+  - SLF4Jのリロケーション（`org.slf4j` → `lib.slf4j`）によりサービスプロバイダーメカニズムが破損
+  - SLF4J 2.xはJava ServiceLoader APIを使用するため、パッケージ名変更で機能しなくなる
+  - `META-INF/services/org.slf4j.spi.SLF4JServiceProvider`が見つからない
+- **解決**:
+  - SLF4Jリロケーションを削除（bukkit & bungee両モジュール）
+  - `mergeServiceFiles()`を追加してサービスプロバイダーファイルを統合
+  - HikariCPとMySQLのみリロケートを維持（依存関係の競合回避）
+- **影響**: SLF4Jエラーが解消され、HikariCPのログが正常に出力される
 
 ### v2.3.7 - Shadow plugin移行（新プラグインID） (2026-02-07)
 - **ビルドエラー修正**: 「Plugin 'com.github.johnrengelman.shadow' version '8.1.7' was not found」エラー解消

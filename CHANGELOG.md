@@ -1,5 +1,29 @@
 # 変更履歴 / Changelog
 
+## [2.3.8] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fix
+
+#### SLF4J Provider修正
+- **SLF4Jエラー修正**: 「SLF4J: No SLF4J providers were found」エラー解消
+- **問題**:
+  ```
+  [ERROR]: [MiningTracker] [STDERR] SLF4J: No SLF4J providers were found.
+  [ERROR]: [MiningTracker] [STDERR] SLF4J: Defaulting to no-operation (NOP) logger implementation
+  ```
+- **根本原因**:
+  - SLF4Jのリロケーション（`org.slf4j` → `lib.slf4j`）によりサービスプロバイダーメカニズムが破損
+  - SLF4J 2.xはJava ServiceLoader APIを使用
+  - パッケージ名変更で`META-INF/services/org.slf4j.spi.SLF4JServiceProvider`が機能しない
+- **解決**:
+  - **SLF4Jリロケーション削除**: bukkit & bungee両モジュールから削除
+  - **mergeServiceFiles()追加**: サービスプロバイダーファイルを統合
+  - **HikariCPとMySQLのみリロケート**: 依存関係の競合回避のため維持
+- **影響**:
+  - SLF4Jエラーメッセージが解消
+  - HikariCPのログが正常に出力される
+  - Bukkitサーバー・Bungeecord両方で正常動作
+
 ## [2.3.7] - 2026-02-07
 
 ### 🔧 ビルドエラー修正 / Build Fix
