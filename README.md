@@ -8,7 +8,7 @@ Minecraft 1.21.x対応のプレイヤー採掘トラッキングプラグイン
 
 ## バージョン情報
 
-- **最新バージョン**: 2.5.0
+- **最新バージョン**: 2.5.1
 - **対応Minecraft**: 1.21.x
 - **必須Java**: 21以降
 - **Bungeecord対応**: ✅ 完全対応（v2.2.0以降）
@@ -17,6 +17,7 @@ Minecraft 1.21.x対応のプレイヤー採掘トラッキングプラグイン
 - **Plan統計表示**: ✅ 修正済み（v2.3.5以降）⭐ NEW
 - **SLF4Jログ**: ✅ 完全修正（v2.3.9）⭐ NEW
 - **統計インポート**: ✅ Minecraft統計から自動インポート（v2.5.0）⭐ NEW
+- **強制インポート**: ✅ 既存データを上書きするコマンド（v2.5.1）⭐ NEW
 
 ## 概要
 
@@ -66,8 +67,8 @@ gradle build
 ```
 
 ビルドが成功すると、以下のJARファイルが生成されます：
-- **Bukkit/Paper用**: `miningtracker-bukkit/build/libs/MiningTracker-Bukkit-2.5.0.jar`
-- **Bungeecord用**: `miningtracker-bungee/build/libs/MiningTracker-Bungee-2.5.0.jar`
+- **Bukkit/Paper用**: `miningtracker-bukkit/build/libs/MiningTracker-Bukkit-2.5.1.jar`
+- **Bungeecord用**: `miningtracker-bungee/build/libs/MiningTracker-Bungee-2.5.1.jar`
 
 ⚠️ **重要**: 2つの異なるJARファイルがあります。用途に応じて正しいものを使用してください！
 
@@ -75,26 +76,26 @@ gradle build
 
 ### シングルサーバー（Bukkit/Paper）
 
-1. **`MiningTracker-Bukkit-2.5.0.jar`**をサーバーの`plugins`フォルダにコピー
+1. **`MiningTracker-Bukkit-2.5.1.jar`**をサーバーの`plugins`フォルダにコピー
 2. サーバーを再起動
 3. `plugins/MiningTracker`フォルダに設定ファイルが自動生成されます
 
 ### Bungeecordネットワーク
 
 #### バックエンドサーバー（推奨）
-各バックエンドサーバーに**`MiningTracker-Bukkit-2.5.0.jar`**をインストール：
+各バックエンドサーバーに**`MiningTracker-Bukkit-2.5.1.jar`**をインストール：
 ```bash
 # Survival サーバー
-cp MiningTracker-Bukkit-2.5.0.jar /path/to/survival/plugins/
+cp MiningTracker-Bukkit-2.5.1.jar /path/to/survival/plugins/
 
 # Creative サーバー
-cp MiningTracker-Bukkit-2.5.0.jar /path/to/creative/plugins/
+cp MiningTracker-Bukkit-2.5.1.jar /path/to/creative/plugins/
 ```
 
 #### Bungeecordプロキシ（オプション）
-ネットワーク統計のみ表示する場合、**`MiningTracker-Bungee-2.5.0.jar`**をプロキシにインストール：
+ネットワーク統計のみ表示する場合、**`MiningTracker-Bungee-2.5.1.jar`**をプロキシにインストール：
 ```bash
-cp MiningTracker-Bungee-2.5.0.jar /path/to/bungeecord/plugins/
+cp MiningTracker-Bungee-2.5.1.jar /path/to/bungeecord/plugins/
 ```
 
 ⚠️ **注意**:
@@ -128,6 +129,15 @@ cp MiningTracker-Bungee-2.5.0.jar /path/to/bungeecord/plugins/
 - **confirm**: リセットを確定（安全のため2段階実行）
 - **権限**: `miningtracker.reset` (デフォルト: op)
 
+### `/mtimport <プレイヤー名> [confirm]` ⭐ NEW (v2.5.1)
+- **エイリアス**: `/mtimp`
+- **説明**: Minecraft統計から強制的にインポートします（管理者専用）
+- **動作**: 既存データを統計ファイルの値で上書き
+- **例**: 統計ファイル=50、データベース=2 → 実行後 → データベース=50
+- **confirm**: インポートを確定（安全のため2段階実行）
+- **権限**: `miningtracker.import` (デフォルト: op)
+- **用途**: データ修正、統計ファイルからの再同期
+
 ## 権限
 
 | 権限 | 説明 | デフォルト |
@@ -135,6 +145,7 @@ cp MiningTracker-Bungee-2.5.0.jar /path/to/bungeecord/plugins/
 | `miningtracker.use` | プラグインの基本機能を使用 | true |
 | `miningtracker.other` | 他のプレイヤーの統計を閲覧 | true |
 | `miningtracker.reset` | 統計をリセット | op |
+| `miningtracker.import` | 統計を強制インポート（v2.5.1） | op |
 
 ## Plan Player Analytics 連携
 
@@ -312,6 +323,28 @@ import:
 
 詳細は [MINECRAFT_STATS_IMPORT.md](MINECRAFT_STATS_IMPORT.md) を参照してください。
 
+### 強制インポート機能 ⭐ NEW (v2.5.1)
+
+**v2.5.1の新機能**: 既存データがある場合でも、Minecraft統計でデータを上書きできます。
+
+```bash
+# 既存データを統計ファイルの値で上書き
+/mtimport <プレイヤー名> confirm
+
+# 例: Steveの統計を強制インポート
+/mtimport Steve confirm
+```
+
+**動作例**:
+- 統計ファイル: 石 50個、ダイヤ 10個
+- データベース: 石 2個、ダイヤ 5個
+- 実行後: 石 50個、ダイヤ 10個（統計ファイルの値で上書き）
+
+**用途**:
+- データが壊れた場合の復元
+- 統計ファイルからの再同期
+- 管理者によるデータ修正
+
 ## 使用例
 
 ### 自分の統計を確認
@@ -334,6 +367,11 @@ import:
 ```
 /mtreset Steve confirm        # Steveの統計をリセット
 /mtreset all confirm          # 全プレイヤーの統計をリセット
+```
+
+### 統計を強制インポート ⭐ NEW (v2.5.1)
+```
+/mtimport Steve confirm       # Steveの統計を統計ファイルから上書き
 ```
 
 ## データベース

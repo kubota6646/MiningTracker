@@ -1,5 +1,32 @@
 # 変更履歴 / Changelog
 
+## [2.5.1] - 2026-02-07
+
+### ✨ 新機能 / New Feature
+
+#### 強制インポートコマンド (`/mtimport`)
+- **要件**: 既存データがある場合でも、Minecraft統計でデータを上書きするコマンドを追加
+- **コマンド**: `/mtimport <プレイヤー名> confirm`
+- **エイリアス**: `/mtimp`
+- **動作例**: 
+  - 統計ファイル: 50個
+  - データベース: 2個
+  - コマンド実行後: 50個（統計の値で上書き）
+- **権限**: `miningtracker.import` (デフォルト: op)
+- **実装内容**:
+  - ImportCommand: 新しいコマンドクラス（確認ステップ付き）
+  - DatabaseManager.setMiningCount(): 加算ではなく置換する新メソッド
+  - MinecraftStatsImporter: forceOverwriteフラグ対応
+- **使用ケース**:
+  - データが壊れた場合の復元
+  - 統計ファイルからの再同期
+  - 管理者によるデータ修正
+
+### 📋 技術的詳細 / Technical Details
+- 安全性確保のため確認ステップ必須
+- 非同期処理でサーバーパフォーマンスに影響なし
+- MySQL/SQLite両対応のUPSERT構文使用
+
 ## [2.5.0] - 2026-02-07
 
 ### ✨ 新機能 / New Feature

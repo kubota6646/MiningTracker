@@ -2,9 +2,26 @@
 
 ## 現在のバージョン
 
-**v2.5.0** (2026-02-07)
+**v2.5.1** (2026-02-07)
 
 ## バージョン履歴
+
+### v2.5.1 - 強制インポートコマンド追加 (2026-02-07)
+- **新機能**: `/mtimport` コマンド - 既存データをMinecraft統計で上書き ⭐
+- **コマンド**: `/mtimport <プレイヤー名> confirm` で実行
+- **動作**: 統計ファイルの値でデータベースを上書き（例: 統計50 → DB2 → 実行後 → DB50）
+- **権限**: `miningtracker.import` (デフォルト: op)
+- **安全性**: 確認ステップ必須（resetコマンドと同様のパターン）
+- **技術的詳細**:
+  - DatabaseManager.setMiningCount() - 加算ではなく置換する新メソッド
+  - MinecraftStatsImporter.importPlayerStats() - forceOverwriteフラグ対応
+  - ImportCommand - 新しいコマンドエグゼキューター
+  - 非同期処理でメインスレッドをブロックしない
+- **メッセージ**: import.usage, import.confirm, import.success, import.failed
+- **影響**: 
+  - 既存データがある場合でも統計から再インポート可能
+  - データ修正・復元時に有用
+  - 管理者専用機能
 
 ### v2.5.0 - Minecraft統計インポート機能追加 (2026-02-07)
 - **新機能**: 既存データがない場合、Minecraftの統計ファイルから採掘データを自動インポート ⭐
