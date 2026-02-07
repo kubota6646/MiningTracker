@@ -1,5 +1,27 @@
 # 変更履歴 / Changelog
 
+## [2.3.9] - 2026-02-07
+
+### 🐛 バグ修正 / Bug Fix
+
+#### SLF4J依存関係の明示化
+- **SLF4Jエラー修正**: v2.3.8で修正を試みたが継続していたエラーを完全解決
+- **問題**:
+  ```
+  [ERROR]: [MiningTracker] [STDERR] SLF4J: No SLF4J providers were found.
+  [ERROR]: [MiningTracker] [STDERR] SLF4J: Defaulting to no-operation (NOP) logger implementation
+  ```
+- **根本原因**:
+  - commonモジュールで`slf4j-simple`を宣言
+  - しかしbukkit/bungeeモジュールで明示的に宣言されていなかった
+  - 推移的依存関係として含まれるべきだったが、shadowJarで正しく処理されなかった
+- **解決**:
+  - bukkit/bungee両モジュールの`dependencies`に`slf4j-simple:2.0.9`を明示的に追加
+  - 各モジュールで直接依存関係を宣言することで、shadowJarが確実に含める
+- **影響**:
+  - SLF4Jエラーが完全に解消
+  - HikariCPのログが正常に出力される
+
 ## [2.3.8] - 2026-02-07
 
 ### 🐛 バグ修正 / Bug Fix

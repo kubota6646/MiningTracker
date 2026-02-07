@@ -2,9 +2,21 @@
 
 ## 現在のバージョン
 
-**v2.3.8** (2026-02-07)
+**v2.3.9** (2026-02-07)
 
 ## バージョン履歴
+
+### v2.3.9 - SLF4J依存関係の明示化 (2026-02-07)
+- **SLF4Jエラー修正**: v2.3.8で修正を試みたが、エラーが継続していた問題を完全解決
+- **問題**: v2.3.8の修正後も「SLF4J: No SLF4J providers were found」エラーが継続
+- **根本原因**:
+  - commonモジュールで`slf4j-simple`を宣言
+  - しかしbukkit/bungeeモジュールで明示的に宣言されていなかった
+  - 推移的依存関係として含まれるべきだったが、shadowJarで正しく処理されなかった
+- **解決**:
+  - bukkit/bungee両モジュールの`dependencies`に`slf4j-simple:2.0.9`を明示的に追加
+  - shadowJarが依存関係を確実に含めるように修正
+- **影響**: SLF4Jエラーが完全に解消され、HikariCPのログが正常に出力される
 
 ### v2.3.8 - SLF4J Provider修正 (2026-02-07)
 - **SLF4Jエラー修正**: 「SLF4J: No SLF4J providers were found」エラー解消
