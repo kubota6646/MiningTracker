@@ -2,9 +2,39 @@
 
 ## 現在のバージョン
 
-**v2.4.0** (2026-02-07)
+**v2.4.1** (2026-02-07)
 
 ## バージョン履歴
+
+### v2.4.1 - SQL構文エラー修正 & Planリアルタイム更新実装 (2026-02-07)
+- **重大なバグ修正**: MySQLでランク取得時のSQL構文エラーを修正
+- **新機能**: Plan統計のリアルタイム更新機能を実装 ⭐
+- **問題**: 
+  ```
+  [Plan Non critical-pool-3/WARN]: [MiningTracker] ランク取得エラー: 
+  You have an error in your SQL syntax near 'rank FROM mining_data
+  ```
+- **根本原因**:
+  - `rank`はMySQLの予約語
+  - SQLクエリで`rank`を列エイリアスとして使用していた
+  - バッククォートでエスケープまたは別名が必要
+- **解決**:
+  - DatabaseManager.getPlayerRank(): `rank` → `player_rank`に変更
+  - エラーログにスタックトレースを追加してデバッグを容易化
+- **新機能 - Planリアルタイム更新**:
+  - MiningTrackerExtension: `invalidatePlayerCache(UUID)` メソッド追加
+  - MiningTrackerExtension: `invalidateServerCache()` メソッド追加
+  - MiningTracker: `getPlanExtension()` ゲッター追加
+  - DataManager: ブロック破壊時にPlanキャッシュを無効化
+  - ExtensionService.invalidate() を使用したキャッシュ無効化
+- **技術的詳細**:
+  - ブロック破壊 → データ保存 → Planキャッシュ無効化
+  - プレイヤー統計、サーバー統計、ネットワーク統計が即時更新
+  - Plan APIの公式推奨方法を使用
+- **影響**:
+  - SQL構文エラーが完全に解消
+  - ブロック破壊後、即座にPlanに採掘量が反映される
+  - リアルタイムでランキングも更新される
 
 ### v2.4.0 - SLF4J完全修正（slf4j-jdk14への切り替え） (2026-02-07)
 - **SLF4Jエラー根本解決**: v2.3.8, v2.3.9での修正後も継続していたエラーを根本的に解決

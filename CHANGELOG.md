@@ -1,5 +1,36 @@
 # 変更履歴 / Changelog
 
+## [2.4.1] - 2026-02-07
+
+### 🐛 重大なバグ修正 / Critical Bug Fix
+
+#### SQL構文エラー修正 - rank予約語問題
+- **問題**:
+  ```
+  [Plan Non critical-pool-3/WARN]: [MiningTracker] ランク取得エラー: 
+  You have an error in your SQL syntax near 'rank FROM mining_data
+  ```
+- **根本原因**: `rank`はMySQLの予約語、SQLクエリで列エイリアスとして使用
+- **解決**: DatabaseManager.getPlayerRank() で `rank` → `player_rank` に変更
+- **影響**: SQL構文エラーが完全に解消、Planでランキングが正常に表示
+
+### ✨ 新機能 / New Feature
+
+#### Planリアルタイム更新実装
+- **要件**: 総採掘量をPlanにリアルタイムで反映
+- **実装内容**:
+  - MiningTrackerExtension: `invalidatePlayerCache(UUID)` メソッド追加
+  - MiningTrackerExtension: `invalidateServerCache()` メソッド追加
+  - DataManager: ブロック破壊時にPlanキャッシュを自動無効化
+  - ExtensionService.invalidate() を使用した公式推奨方法
+- **技術的詳細**:
+  - ブロック破壊 → DB保存 → Planキャッシュ無効化（非同期処理）
+  - プレイヤー統計、サーバー統計、ネットワーク統計が即時更新
+- **影響**:
+  - ブロック破壊後、即座にPlanに採掘量が反映される ⭐
+  - リアルタイムでランキングも更新される
+  - Plan拡張機能が完全にリアルタイム対応
+
 ## [2.4.0] - 2026-02-07
 
 ### 🎉 メジャー修正 / Major Fix
