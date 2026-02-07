@@ -1,0 +1,17 @@
+# MiningTracker Bungeecord設定ファイル
+
+# データベース設定（MySQLのみサポート）
+database:
+  type: mysql
+  
+  # MySQL設定
+  mysql:
+    host: localhost
+    port: 3306
+    database: minecraft
+    username: root
+    password: password
+    pool:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
